@@ -1,46 +1,35 @@
 "use client";
+
 import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { createWorker } from 'tesseract.js';
-import type { Worker } from 'tesseract.js';
+import { extractTextFromImage } from '../../lib/ocrUtils'
+import { Label } from "@/components/ui/label";
 
-export default function ImageUploader() {
+interface ImageUploaderProps {
+  onTextExtracted: (text: string) => void;
+  onFileChange: (file: File | null) => void;
+}
+
+export default function ImageUploader({ onTextExtracted, onFileChange }: ImageUploaderProps) {
   const [image, setImage] = useState<string | null>(null);
-  const [text, setText] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState(false);
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     if (acceptedFiles.length === 0) return;
    
     const file = acceptedFiles[0];
+    onFileChange(file);
     const imageUrl = URL.createObjectURL(file);
     setImage(imageUrl);
-    setText('');
    
-    processImage(imageUrl);
-  }, []);
-
-  const processImage = async (imageUrl: string) => {
     setIsProcessing(true);
-   
-    let worker: Worker | null = null;
+    const { text, error } = await extractTextFromImage(imageUrl);
+    setIsProcessing(false);
     
-    try {
-      worker = await createWorker('eng');
-      
-      const result = await worker.recognize(imageUrl);
-      
-      setText(result.data.text);
-    } catch (error) {
-      console.error('Error during OCR:', error);
-      setText('Error processing image');
-    } finally {
-      if (worker) {
-        await worker.terminate();
-      }
-      setIsProcessing(false);
+    if (!error) {
+      onTextExtracted(text);
     }
-  };
+  }, [onTextExtracted, onFileChange]);
 
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
@@ -51,36 +40,24 @@ export default function ImageUploader() {
   });
 
   return (
-    <div className="container mx-auto p-4">
-      <div
-        {...getRootProps()}
+    <div className="space-y-4">
+      <div 
+        {...getRootProps()} 
         className="border-2 border-dashed border-gray-300 p-6 rounded-md text-center cursor-pointer hover:border-gray-500"
       >
         <input {...getInputProps()} />
         <p>Drag & drop an image here, or click to select one</p>
+        {isProcessing && <p className="mt-2">Processing text from image...</p>}
       </div>
      
       {image && (
         <div className="mt-4">
-          <div className="mb-4">
-            <h3 className="text-lg font-semibold">Uploaded Image:</h3>
-            <img
-              src={image}
-              alt="Uploaded preview"
-              className="mt-2 max-w-full h-auto max-h-96 rounded-md"
-            />
-          </div>
-         
-          <div>
-            <h3 className="text-lg font-semibold">Extracted Text:</h3>
-            {isProcessing ? (
-              <p className="mt-2">Processing...</p>
-            ) : (
-              <pre className="mt-2 p-4 bg-gray-100 rounded-md whitespace-pre-wrap">
-                {text || 'No text extracted'}
-              </pre>
-            )}
-          </div>
+          <Label>Uploaded Image:</Label>
+          <img
+            src={image}
+            alt="Uploaded preview"
+            className="mt-2 max-w-full h-auto max-h-48 rounded-md"
+          />
         </div>
       )}
     </div>

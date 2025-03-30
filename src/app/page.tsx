@@ -1,9 +1,9 @@
-import ImageUploader from "./components/ImageUploader";
+import CrushScenarioForm from "./components/ScenarioForm";
 
 export default function Home() {
   return (
     <div className="bg-black-500">
-      <ImageUploader/>
+      <CrushScenarioForm/>
     </div>
   );
 }
