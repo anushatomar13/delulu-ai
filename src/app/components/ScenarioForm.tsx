@@ -1,3 +1,4 @@
+"use client"
 import { useState } from 'react';
 import { useRouter } from 'next/navigation'; 
 
@@ -35,7 +36,7 @@ export default function CrushScenarioForm() {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-4 border rounded-lg shadow-lg bg-white">
+    <div className="max-w-md mx-auto mt-10 p-4 border rounded-lg shadow-lg ">
       <h2 className="text-xl font-semibold mb-4">Delulu or Not?</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <textarea
