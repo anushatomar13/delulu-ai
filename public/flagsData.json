@@ -1,0 +1,43 @@
+[
+    {
+      "id": 1,
+      "type": "red",
+      "text": "They dismiss your feelings instead of listening."
+    },
+    {
+      "id": 2,
+      "type": "red",
+      "text": "They always talk about themselves and never ask about you."
+    },
+    {
+      "id": 3,
+      "type": "green",
+      "text": "They remember small details about things you love."
+    },
+    {
+      "id": 4,
+      "type": "green",
+      "text": "They actively encourage your personal growth and goals."
+    },
+    {
+      "id": 5,
+      "type": "red",
+      "text": "They get jealous when you spend time with friends or family."
+    },
+    {
+      "id": 6,
+      "type": "green",
+      "text": "They respect your boundaries and give you space when needed."
+    },
+    {
+      "id": 7,
+      "type": "red",
+      "text": "They make fun of your insecurities instead of supporting you."
+    },
+    {
+      "id": 8,
+      "type": "green",
+      "text": "They apologize sincerely when they make mistakes."
+    }
+  ]
+  
