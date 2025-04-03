@@ -1,16 +1,19 @@
 'use client';
 
 import React, { useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, useMotionTemplate, useMotionValue, useSpring } from 'framer-motion';
 import { FiMousePointer } from 'react-icons/fi';
 
 const Features = () => {
+  const router = useRouter();
+
   return (
     <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-8 px-4 py-12">
       <h1 className="text-white text-4xl font-bold">Features</h1>
       <div className="flex flex-wrap justify-center gap-8">
-        <TiltCard title="Are you delulu or not?" />
-        <TiltCard title="Red flags or Green flags?" />
+        <TiltCard title="Are you delulu or not?" onClick={() => router.push('/delulu-analyzer')} />
+        <TiltCard title="Red flags or Green flags?" onClick={()=>router.push('/red-or-green-flag')} />
       </div>
     </div>
   );
@@ -21,9 +24,10 @@ const HALF_ROTATION_RANGE = ROTATION_RANGE / 2;
 
 interface TiltCardProps {
   title: string;
+  onClick?: () => void;
 }
 
-const TiltCard: React.FC<TiltCardProps> = ({ title }) => {
+const TiltCard: React.FC<TiltCardProps> = ({ title, onClick }) => {
   const ref = useRef<HTMLDivElement | null>(null);
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -54,8 +58,9 @@ const TiltCard: React.FC<TiltCardProps> = ({ title }) => {
       ref={ref}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
+      onClick={onClick}
       style={{ transformStyle: 'preserve-3d', transform }}
-      className="relative h-96 w-72 rounded-xl bg-gradient-to-br from-indigo-300 to-violet-300"
+      className="relative h-96 w-72 rounded-xl bg-gradient-to-br from-indigo-300 to-violet-300 cursor-pointer"
     >
       <div
         style={{ transform: 'translateZ(75px)', transformStyle: 'preserve-3d' }}

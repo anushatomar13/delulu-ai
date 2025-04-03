@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { extractTextFromImage } from '../../lib/ocrUtils'
+import { extractTextFromImage } from '../../../../lib/ocrUtils'
 import { Label } from "@/components/ui/label";
 
 interface ImageUploaderProps {
