@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useEffect } from "react";
 import { motion, useMotionValue, useTransform } from "framer-motion";
 
@@ -23,7 +24,7 @@ const FlagSwiper: React.FC = () => {
   useEffect(() => {
     const fetchFlags = async () => {
       try {
-        const response = await fetch("/flagsData.json"); 
+        const response = await fetch("public\flagsData.json"); 
         const data: FlagCard[] = await response.json();
         setFlagCards(getRandomFlags(data, 5)); 
       } catch (error) {

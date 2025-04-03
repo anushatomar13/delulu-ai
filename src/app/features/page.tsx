@@ -12,8 +12,8 @@ const Features = () => {
     <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-8 px-4 py-12">
       <h1 className="text-white text-4xl font-bold">Features</h1>
       <div className="flex flex-wrap justify-center gap-8">
-        <TiltCard title="Are you delulu or not?" onClick={() => router.push('/delulu-analyzer')} />
-        <TiltCard title="Red flags or Green flags?" onClick={()=>router.push('/red-or-green-flag')} />
+        <TiltCard title="Are you delulu or not?" onClick={() => router.push('/features/delulu-analyzer')} />
+        <TiltCard title="Red flags or Green flags?" onClick={()=>router.push('/features/red-or-green-flag')} />
       </div>
     </div>
   );
