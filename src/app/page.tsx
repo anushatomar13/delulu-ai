@@ -1,10 +1,11 @@
 "use client";
-import SwipeCards from "./components/CardsSwipe";
+import { HeroSectionOne } from "./components/Hero";
+
 export default function Home() {
 
   return (
     <div className="bg-black-500">
-      <SwipeCards/>
+      <HeroSectionOne/>
     </div>
   );
 }

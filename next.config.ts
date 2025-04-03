@@ -1,7 +1,11 @@
 import type { NextConfig } from "next";
-const nextConfig = {
-  output: 'export',
-  webpack: (config:any) => {
+
+const nextConfig: NextConfig = {
+  output: "export",
+  images: {
+    unoptimized: true, 
+  },
+  webpack: (config: any) => {
     config.resolve.alias = {
       ...config.resolve.alias,
       "sharp$": false,
@@ -10,6 +14,5 @@ const nextConfig = {
     return config;
   },
 };
-
 
 export default nextConfig;
