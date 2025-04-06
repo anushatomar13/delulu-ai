@@ -7,8 +7,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import ImageUploader from './components/ImageUploader';
+import { supabase } from '@/lib/supabaseClient';
+import { useUser } from '@supabase/auth-helpers-react'
+
 
 export default function CrushScenarioForm() {
+  const user = useUser() 
   const [scenario, setScenario] = useState('');
   const [loading, setLoading] = useState(false);
   const [response, setResponse] = useState<string | null>(null);
@@ -43,8 +47,48 @@ export default function CrushScenarioForm() {
       const data = await res.json();
 
       if (res.ok) {
+        if (user) {
+          const { data: existing, error: fetchError } = await supabase
+            .from('user_scenarios')
+            .select('*')
+            .eq('user_id', user.id)
+            .single();
+      
+          if (fetchError) {
+            console.error('Error fetching user data:', fetchError);
+          }
+      
+          if (existing) {
+            const { error: updateError } = await supabase
+              .from('user_scenarios')
+              .update({
+                scenarios: [...existing.scenarios, scenario],
+                results: [...existing.results, data.message],
+                updated_at: new Date()
+              })
+              .eq('user_id', user.id);
+      
+            if (updateError) {
+              console.error('Error updating scenario:', updateError);
+            }
+          } else {
+            const { error: insertError } = await supabase
+              .from('user_scenarios')
+              .insert({
+                user_id: user.id,
+                scenarios: [scenario],
+                results: [data.message]
+              });
+      
+            if (insertError) {
+              console.error('Error inserting scenario:', insertError);
+            }
+          }
+        }
+      
         router.push(`/result?scenario=${encodeURIComponent(scenario)}&result=${encodeURIComponent(data.message)}`);
-      } else {
+      }
+       else {
         setResponse("Something went wrong. Try again.");
       }
     } catch (error) {
