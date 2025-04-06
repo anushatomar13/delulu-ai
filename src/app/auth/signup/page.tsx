@@ -15,7 +15,7 @@ export default function Signup() {
     e.preventDefault();
     const { data, error } = await signUp(email, password);
     if (error) setError(error.message);
-    else router.push('/dashboard');
+    else router.push('/auth/login');
   };
 
   return (

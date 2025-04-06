@@ -15,7 +15,7 @@ export default function Login() {
     setError(null);
     const { data, error } = await logIn(email, password);
     if (error) setError(error.message);
-    else router.push('/dashboard');
+    else router.push('/features');
   };
 
   return (
