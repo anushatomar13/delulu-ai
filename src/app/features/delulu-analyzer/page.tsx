@@ -10,7 +10,6 @@ import ImageUploader from './components/ImageUploader';
 import { supabase } from '@/lib/supabaseClient';
 import { useUser } from '@supabase/auth-helpers-react'
 
-
 export default function CrushScenarioForm() {
   const user = useUser() 
   const [scenario, setScenario] = useState('');
@@ -25,6 +24,49 @@ export default function CrushScenarioForm() {
 
   const handleFileChange = (newFile: File | null) => {
     setFile(newFile);
+  };
+
+  // Extract delulu rating from AI response
+  const extractDeluluRating = (aiResponse: string): number => {
+    // Look for patterns like "8/10", "Rating: 7", etc.
+    const ratingMatch = aiResponse.match(/(\d+)\/10|rating:?\s*(\d+)/i);
+    if (ratingMatch) {
+      return parseInt(ratingMatch[1] || ratingMatch[2]);
+    }
+    // Default rating based on response content
+    const lowerResponse = aiResponse.toLowerCase();
+    if (lowerResponse.includes('very delulu') || lowerResponse.includes('extremely delulu')) return 9;
+    if (lowerResponse.includes('delulu') && lowerResponse.includes('high')) return 7;
+    if (lowerResponse.includes('delulu')) return 6;
+    if (lowerResponse.includes('realistic') || lowerResponse.includes('not delulu')) return 3;
+    return 5; // Default middle rating
+  };
+
+  const storeResponseInSupabase = async (scenario: string, aiResponse: string) => {
+    if (!user) return;
+
+    try {
+      const deluluRating = extractDeluluRating(aiResponse);
+      
+      const { error } = await supabase
+        .from('user_responses')
+        .insert({
+          user_id: user.id,
+          response_type: 'text-analysis',
+          result: aiResponse,
+          delulu_rating: deluluRating,
+          scenario_text: scenario,
+          card_choices: null
+        });
+
+      if (error) {
+        console.error('Error storing response in Supabase:', error);
+      } else {
+        console.log('Response stored successfully in Supabase');
+      }
+    } catch (error) {
+      console.error('Error storing response:', error);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -47,6 +89,10 @@ export default function CrushScenarioForm() {
       const data = await res.json();
 
       if (res.ok) {
+        // Store in unified user_responses table
+        await storeResponseInSupabase(scenario, data.message);
+        
+        // Keep the old user_scenarios table updated for backward compatibility
         if (user) {
           const { data: existing, error: fetchError } = await supabase
             .from('user_scenarios')
@@ -54,7 +100,7 @@ export default function CrushScenarioForm() {
             .eq('user_id', user.id)
             .single();
       
-          if (fetchError) {
+          if (fetchError && fetchError.code !== 'PGRST116') {
             console.error('Error fetching user data:', fetchError);
           }
       
@@ -87,8 +133,7 @@ export default function CrushScenarioForm() {
         }
       
         router.push(`/features/delulu-analyzer/result?scenario=${encodeURIComponent(scenario)}&result=${encodeURIComponent(data.message)}`);
-      }
-       else {
+      } else {
         setResponse("Something went wrong. Try again.");
       }
     } catch (error) {
