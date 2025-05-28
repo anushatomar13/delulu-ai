@@ -86,7 +86,7 @@ export default function CrushScenarioForm() {
           }
         }
       
-        router.push(`/result?scenario=${encodeURIComponent(scenario)}&result=${encodeURIComponent(data.message)}`);
+        router.push(`/features/delulu-analyzer/result?scenario=${encodeURIComponent(scenario)}&result=${encodeURIComponent(data.message)}`);
       }
        else {
         setResponse("Something went wrong. Try again.");
