@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { gsap } from 'gsap';
 
 interface ShareableBadgeProps {
   responseCount: number;
@@ -13,7 +14,7 @@ interface ShareableBadgeProps {
   showStats?: boolean;
 }
 
-export default function ShareableBadge({ 
+export default function ShareableBadge({
   responseCount,
   redFlags,
   greenFlags,
@@ -24,6 +25,41 @@ export default function ShareableBadge({
   showStats = true
 }: ShareableBadgeProps) {
   const [isSharing, setIsSharing] = useState(false);
+  const badgeRef = useRef<HTMLDivElement>(null);
+  const buttonsRef = useRef<HTMLDivElement>(null);
+
+  // GSAP Animations
+  useEffect(() => {
+    gsap.set([badgeRef.current, buttonsRef.current], { opacity: 0, y: 20 });
+    gsap.to([badgeRef.current, buttonsRef.current], {
+      opacity: 1,
+      y: 0,
+      duration: 0.8,
+      stagger: 0.1,
+      ease: "power2.out"
+    });
+
+    // Hover effects for buttons
+    const buttons = buttonsRef.current?.querySelectorAll('button');
+    if (buttons) {
+      buttons.forEach((button) => {
+        button.addEventListener('mouseenter', () => {
+          gsap.to(button, {
+            scale: 1.05,
+            boxShadow: '0 0 15px rgba(168, 85, 247, 0.5)',
+            duration: 0.2
+          });
+        });
+        button.addEventListener('mouseleave', () => {
+          gsap.to(button, {
+            scale: 1,
+            boxShadow: 'none',
+            duration: 0.2
+          });
+        });
+      });
+    }
+  }, []);
 
   const createBadgeCanvas = (size: 'story' | 'post' | 'square' = 'story') => {
     const canvas = document.createElement('canvas');
@@ -77,7 +113,7 @@ export default function ShareableBadge({
     ctx.fillStyle = 'white';
     ctx.textAlign = 'center';
 
-    const positions = size === 'story' 
+    const positions = size === 'story'
       ? {
           emoji: height * 0.21,
           title1: height * 0.31,
@@ -101,24 +137,20 @@ export default function ShareableBadge({
           watermark: height * 0.95
         };
 
-    // Badge name
     if (badgeName) {
       ctx.font = `bold ${fontSize.title}px Arial`;
       ctx.fillText(badgeName.toUpperCase(), centerX, positions.title1);
     }
 
-    // Emoji
     ctx.font = `bold ${fontSize.emoji}px Arial`;
     ctx.fillText('🏆', centerX, positions.emoji);
 
-    // Badge description (wrapped)
     if (badgeDescription) {
       ctx.font = `${fontSize.subtitle}px Arial`;
       ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
       wrapText(ctx, badgeDescription, centerX, positions.title2 + fontSize.subtitle, width * 0.8, fontSize.subtitle);
     }
 
-    // Main text
     ctx.font = `bold ${fontSize.title}px Arial`;
     ctx.fillStyle = 'white';
     if (showStats) {
@@ -127,7 +159,6 @@ export default function ShareableBadge({
       ctx.fillText(`🚨 ${redFlags} Red • ✅ ${greenFlags} Green`, centerX, positions.stats2);
     }
 
-    // Subtitle
     ctx.font = `${fontSize.subtitle}px Arial`;
     ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
     ctx.fillText('Check if you are on', centerX, positions.subtitle);
@@ -136,7 +167,6 @@ export default function ShareableBadge({
     ctx.fillStyle = 'white';
     ctx.fillText('Rizz or Risk AI', centerX, positions.brand);
 
-    // Watermark
     ctx.font = `${fontSize.watermark}px Arial`;
     ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
     ctx.fillText('Rizz or Risk AI', centerX, positions.watermark);
@@ -252,41 +282,55 @@ export default function ShareableBadge({
   ];
 
   return (
-    <div className={`space-y-4 ${isCurrent ? 'ring-4 ring-purple-400' : 'opacity-80'}`}>
-      <div className="bg-gradient-to-br from-pink-500/30 via-purple-600/30 to-indigo-700/30 rounded-2xl p-6 max-w-xs mx-auto text-center relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-2 left-2 w-4 h-4 bg-white rounded-full"></div>
-          <div className="absolute top-6 right-4 w-2 h-2 bg-white rounded-full"></div>
-          <div className="absolute bottom-4 left-4 w-3 h-3 bg-white rounded-full"></div>
-          <div className="absolute bottom-2 right-2 w-5 h-5 bg-white rounded-full"></div>
+    <div className={`space-y-6 ${isCurrent ? 'ring-4 ring-purple-400 rounded-xl' : ''}`}>
+      <div
+        ref={badgeRef}
+        className={`relative overflow-hidden rounded-2xl p-6 max-w-xs mx-auto text-center bg-gradient-to-br from-gray-900/90 to-gray-800/80 backdrop-blur-sm border border-gray-700 shadow-lg`}
+      >
+        <div className="absolute inset-0 opacity-10 pointer-events-none">
+          {[...Array(6)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-2 h-2 bg-white rounded-full"
+              style={{
+                top: `${Math.random() * 100}%`,
+                left: `${Math.random() * 100}%`,
+                opacity: 0.2
+              }}
+            />
+          ))}
         </div>
         <div className="relative z-10">
           {badgeName && <p className="text-white font-bold text-lg mb-1">{badgeName}</p>}
           <div className="text-4xl mb-3">🏆</div>
-          {badgeDescription && <p className="text-white/80 text-sm mb-2">{badgeDescription}</p>}
+          {badgeDescription && <p className="text-gray-300 text-sm mb-2">{badgeDescription}</p>}
           {showStats && (
             <>
-              <p className="text-white font-bold text-sm mb-1">I've analyzed</p>
+              <p className="text-gray-300 font-bold text-sm mb-1">I've analyzed</p>
               <p className="text-white font-bold text-lg mb-3">{responseCount}+ Scenarios</p>
-              <div className="pt-3 border-t border-white/20">
-                <p className="text-white/80 text-xs">🚨 {redFlags} Red • ✅ {greenFlags} Green</p>
+              <div className="pt-3 border-t border-gray-600">
+                <p className="text-gray-300 text-xs">🚨 {redFlags} Red • ✅ {greenFlags} Green</p>
               </div>
             </>
           )}
         </div>
       </div>
       {showStats && (
-        <div className="grid grid-cols-2 gap-3">
+        <div ref={buttonsRef} className="grid grid-cols-2 gap-3 max-w-xs mx-auto">
           {shareOptions.map((option, index) => (
             <button
               key={index}
               onClick={option.action}
               disabled={isSharing}
-              className={`${
-                option.primary
-                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600'
-                  : 'bg-white/20 hover:bg-white/30'
-              } text-white font-semibold py-3 px-4 rounded-lg transition-all transform hover:scale-105 flex flex-col items-center justify-center space-y-1 min-h-[80px] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none`}
+              className={`
+                ${option.primary
+                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700'
+                  : 'bg-gray-800 hover:bg-gray-700'
+                }
+                text-gray-100 font-semibold py-3 px-4 rounded-lg transition-all
+                flex flex-col items-center justify-center space-y-1 min-h-[80px]
+                disabled:opacity-50 disabled:cursor-not-allowed
+              `}
             >
               <span className="text-lg">{isSharing && option.primary ? '⏳' : option.icon}</span>
               <span className="text-xs text-center leading-tight">{option.label}</span>

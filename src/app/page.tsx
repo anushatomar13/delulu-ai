@@ -148,7 +148,7 @@ export default function HomePage() {
               <Link href="/analyze" className="nav-link mt-3">
                 📝 analyze
               </Link>
-              <Link href="/swipe" className="nav-link mt-3">
+              <Link href="/red-or-green" className="nav-link mt-3">
                 🎮 swipe
               </Link>
               <Link href="/dashboard" className="nav-link mt-3">
@@ -232,7 +232,7 @@ export default function HomePage() {
                   </div>
                 </div>
               </Link>
-              <Link href="/swipe">
+              <Link href="/red-or-green">
                 <div className="feature-card group">
                   <div className="text-5xl mb-6 group-hover:scale-110 transition-transform duration-300">🎯</div>
                   <h3 className="text-2xl font-black text-white mb-4">swipe challenge</h3>

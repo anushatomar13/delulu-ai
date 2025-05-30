@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useState, useEffect, useRef } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
@@ -46,6 +46,14 @@ export default function SwipePage() {
   const [loading, setLoading] = useState(false);
   const [cardAnimation, setCardAnimation] = useState<'left' | 'right' | null>(null);
   
+  // GSAP refs
+  const containerRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const setupRef = useRef<HTMLDivElement>(null);
+  const swipingRef = useRef<HTMLDivElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
+  const floatingRefs = useRef<(HTMLDivElement | null)[]>([]);
+  
   const supabase = createClientComponentClient();
   const router = useRouter();
   const cardRef = useRef<HTMLDivElement>(null);
@@ -61,6 +69,36 @@ export default function SwipePage() {
     };
     getUser();
   }, [supabase, router]);
+
+  useEffect(() => {
+    if (user && typeof window !== 'undefined') {
+      // GSAP animations - fallback to CSS if GSAP not available
+      const animateElements = () => {
+        // Floating elements animation
+        floatingRefs.current.forEach((ref, index) => {
+          if (ref) {
+            ref.style.animation = `float-${index % 3} ${3 + index * 0.5}s infinite ease-in-out`;
+            ref.style.animationDelay = `${index * 0.2}s`;
+          }
+        });
+
+        // Page elements animation
+        if (headerRef.current) {
+          headerRef.current.style.animation = 'fadeInUp 0.8s ease-out';
+        }
+        if (setupRef.current) {
+          setupRef.current.style.animation = 'fadeInUp 0.8s ease-out 0.3s both';
+        }
+        if (swipingRef.current) {
+          swipingRef.current.style.animation = 'fadeInUp 0.8s ease-out 0.3s both';
+        }
+        if (resultsRef.current) {
+          resultsRef.current.style.animation = 'fadeInUp 0.8s ease-out 0.6s both';
+        }
+      };
+      animateElements();
+    }
+  }, [user, gameState]);
 
   const startGame = () => {
     // Shuffle and select scenarios
@@ -96,36 +134,56 @@ export default function SwipePage() {
     }, 300);
   };
 
-async function getAIJudgment(scenario: string) {
+const getAIJudgment = async (results: SwipeResult[]) => {
+  setGameState('results');
+  setLoading(true);
+
   try {
-    const response = await fetch('/api/analyze', {
+    const response = await fetch('/api/flags', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ scenario }),
+      body: JSON.stringify({ 
+        swipeResults: results, // Changed from gameData to swipeResults
+        scenario: `Swipe Game Results: ${results.map(r => `${r.scenario} -> ${r.choice}`).join('\n')}` // Keep this for backward compatibility if needed
+      }),
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || `API request failed with status ${response.status}`);
+      throw new Error(`Failed to get AI judgment: ${response.status} ${response.statusText}`);
     }
 
-    return await response.json();
-  } catch (error) {
-    console.error('Analysis failed:', error);
-    throw new Error(error.message || 'Failed to get AI judgment. Please try again.');
-  }
-}
+    const data = await response.json();
+    
+    // Check if the response has the expected structure
+    if (data.error) {
+      throw new Error(data.error);
+    }
 
-// Usage in component
-const handleSubmit = async () => {
-  try {
-    const result = await getAIJudgment(inputScenario);
-    // Handle successful result
+    const judgment: AIJudgment = {
+      judgment: data.judgment || `bestie... you chose ${results.filter(r => r.choice === 'rizz').length} valid rizz moments and ${results.filter(r => r.choice === 'risk').length} delulu risks.`,
+      deluluRating: data.deluluRating || Math.round((results.filter(r => r.choice === 'risk').length / results.length) * 10)
+    };
+
+    setAIJudgment(judgment);
+    await saveToDatabase(judgment, results);
+
   } catch (error) {
-    setError(error.message);
+    console.error('AI Judgment failed:', error);
+    // Fallback judgment
+    const rizzCount = results.filter(r => r.choice === 'rizz').length;
+    const riskCount = results.filter(r => r.choice === 'risk').length;
+    const deluluRating = Math.round((riskCount / results.length) * 10);
+
+    const fallbackJudgment: AIJudgment = {
+      judgment: `AI is being moody rn but here's the tea: you chose ${rizzCount} rizz and ${riskCount} delulu moments. ${deluluRating >= 7 ? 'bestie you need a reality check 💀' : 'you\'re not completely hopeless ✨'}`,
+      deluluRating
+    };
+
+    setAIJudgment(fallbackJudgment);
+  } finally {
+    setLoading(false);
   }
 };
-
 
   const saveToDatabase = async (judgment: AIJudgment, results: SwipeResult[]) => {
     if (!user) return;
@@ -144,7 +202,6 @@ const handleSubmit = async () => {
           ? JSON.parse(userData.responses) 
           : userData.responses;
       }
-
       // Create new response object
       const newResponse = {
         scenario: `Swipe Game: ${results.length} cards (${results.filter(r => r.choice === 'rizz').length} Rizz, ${results.filter(r => r.choice === 'risk').length} Risk)`,
@@ -189,209 +246,294 @@ const handleSubmit = async () => {
   };
 
   const getDeluluLevel = (rating: number) => {
-    if (rating <= 2) return { emoji: '😇', text: 'Saint', color: 'text-green-400' };
-    if (rating <= 4) return { emoji: '😊', text: 'Realistic', color: 'text-blue-400' };
-    if (rating <= 6) return { emoji: '🤔', text: 'Questionable', color: 'text-yellow-400' };
-    if (rating <= 8) return { emoji: '🤡', text: 'Delulu', color: 'text-orange-400' };
+    if (rating <= 2) return { emoji: '😇', text: 'saint energy', color: 'text-green-400' };
+    if (rating <= 4) return { emoji: '😊', text: 'realistic bestie', color: 'text-blue-400' };
+    if (rating <= 6) return { emoji: '🤔', text: 'kinda sus', color: 'text-yellow-400' };
+    if (rating <= 8) return { emoji: '🤡', text: 'delulu fr', color: 'text-orange-400' };
     return { emoji: '🚨', text: 'MAXIMUM DELULU', color: 'text-red-400' };
   };
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-400 via-purple-500 to-indigo-600 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white"></div>
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="relative">
+          <div className="w-20 h-20 border-4 border-transparent border-t-cyan-400 border-r-purple-500 rounded-full animate-spin"></div>
+          <div className="absolute top-2 left-2 w-16 h-16 border-4 border-transparent border-b-pink-400 border-l-yellow-400 rounded-full animate-spin animate-reverse"></div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-400 via-purple-500 to-indigo-600 p-4">
-      <div className="container mx-auto max-w-2xl">
+    <div ref={containerRef} className="min-h-screen bg-black text-white overflow-hidden relative">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div
+          ref={(el) => (floatingRefs.current[0] = el)}
+          className="absolute top-10 left-10 w-72 h-72 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-full blur-3xl"
+        />
+        <div
+          ref={(el) => (floatingRefs.current[1] = el)}
+          className="absolute top-1/3 right-20 w-96 h-96 bg-gradient-to-r from-cyan-600/20 to-blue-600/20 rounded-full blur-3xl"
+        />
+        <div
+          ref={(el) => (floatingRefs.current[2] = el)}
+          className="absolute bottom-20 left-1/4 w-64 h-64 bg-gradient-to-r from-yellow-600/20 to-orange-600/20 rounded-full blur-3xl"
+        />
+        {[...Array(15)].map((_, i) => (
+          <div
+            key={i}
+            ref={(el) => (floatingRefs.current[i + 3] = el)}
+            className="absolute w-1 h-1 bg-white/20 rounded-full"
+            style={{
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Navigation */}
+      <nav className="relative z-50 flex items-center justify-between p-6 backdrop-blur-sm bg-gray-900/20 border-b border-gray-800/50">
+        <Link href="/" className="nav-link flex items-center gap-2 hover:text-purple-400">
+          <span>←</span>
+          <span>back home</span>
+        </Link>
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 animate-pulse" />
+            <div className="absolute inset-0 w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 blur-md opacity-50" />
+          </div>
+          <span className="text-lg font-black bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+            swipe zone
+          </span>
+        </div>
+        <Link href="/dashboard" className="nav-link flex items-center gap-2 hover:text-cyan-400">
+          <span>dashboard</span>
+          <span>→</span>
+        </Link>
+      </nav>
+
+      <div className="relative z-10 container mx-auto max-w-4xl px-6 py-12">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <Link href="/" className="text-white hover:text-gray-200 flex items-center space-x-2">
-            <span>←</span>
-            <span>Back to Home</span>
-          </Link>
-          <h1 className="text-3xl font-bold text-white">🎮 Swipe Challenge</h1>
-          <Link href="/dashboard" className="text-white hover:text-gray-200 flex items-center space-x-2">
-            <span>Dashboard</span>
-            <span>→</span>
-          </Link>
+        <div ref={headerRef} className="text-center mb-16">
+          <h1 className="text-5xl md:text-7xl font-black mb-4">
+            <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent glitch-effect">
+              swipe
+            </span>
+            <span className="text-white mx-3">your</span>
+            <span className="bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400 bg-clip-text text-transparent glitch-effect">
+              delulu
+            </span>
+          </h1>
+          <p className="text-xl text-gray-400 font-medium">
+            time to expose how delusional you really are bestie 💀
+          </p>
         </div>
 
         {/* Setup Phase */}
         {gameState === 'setup' && (
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 text-center">
-            <div className="text-6xl mb-6">💕</div>
-            <h2 className="text-2xl font-bold text-white mb-4">Ready to Test Your Delulu Level?</h2>
-            <p className="text-white/80 mb-8">
-              Swipe through dating scenarios and we'll judge how delusional you are! 
-              <br />💚 = Valid Rizz | ❤️ = Delulu Risk
-            </p>
-            
-            <div className="mb-8">
-              <label className="block text-white font-semibold mb-4">
-                How many cards do you want to swipe?
-              </label>
-              <select 
-                value={cardCount} 
-                onChange={(e) => setCardCount(Number(e.target.value))}
-                className="bg-white/20 text-white border border-white/30 rounded-lg px-4 py-2 text-center"
+          <div ref={setupRef} className="feature-card group max-w-2xl mx-auto">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl blur opacity-20 group-hover:opacity-40 transition-opacity duration-300" />
+            <div className="relative rounded-2xl bg-gray-900/90 backdrop-blur-sm border border-gray-800 p-12 text-center">
+              <div className="text-8xl mb-8">💕</div>
+              <h2 className="text-3xl font-black text-white mb-4">ready to get humbled?</h2>
+              <p className="text-gray-400 text-lg mb-12 leading-relaxed">
+                swipe through dating scenarios and we'll calculate your delulu level
+                <br />
+                <span className="text-green-400 font-bold">💚 = valid rizz</span> | <span className="text-red-400 font-bold">❤️ = delulu risk</span>
+              </p>
+              
+              <div className="mb-12">
+                <label className="block text-white font-black text-xl mb-6">
+                  how many cards you tryna swipe?
+                </label>
+                <select 
+                  value={cardCount} 
+                  onChange={(e) => setCardCount(Number(e.target.value))}
+                  className="bg-gray-800/60 text-white border border-gray-700 rounded-xl px-6 py-4 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                >
+                  <option value={3}>3 cards (baby steps)</option>
+                  <option value={5}>5 cards (standard delulu test)</option>
+                  <option value={7}>7 cards (extended reality check)</option>
+                  <option value={10}>10 cards (maximum chaos mode)</option>
+                </select>
+              </div>
+              
+              <button
+                onClick={startGame}
+                className="group relative overflow-hidden rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 px-12 py-6 text-xl font-black transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/25"
               >
-                <option value={3}>3 cards (Quick)</option>
-                <option value={5}>5 cards (Standard)</option>
-                <option value={7}>7 cards (Extended)</option>
-                <option value={10}>10 cards (Maximum Delulu)</option>
-              </select>
+                <span className="relative z-10 flex items-center justify-center gap-3">
+                  <span>let's get delusional</span>
+                  <span className="text-3xl">🚀</span>
+                </span>
+                <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              </button>
             </div>
-            
-            <button
-              onClick={startGame}
-              className="bg-white text-purple-600 font-bold py-4 px-8 rounded-xl hover:bg-gray-100 transition-colors text-lg"
-            >
-              Start Swiping! 🚀
-            </button>
           </div>
         )}
-
         {/* Swiping Phase */}
         {gameState === 'swiping' && (
-          <div className="space-y-6">
+          <div ref={swipingRef} className="space-y-8">
             {/* Progress */}
-            <div className="bg-white/10 backdrop-blur-md rounded-lg p-4">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-white font-semibold">
-                  Card {currentCardIndex + 1} of {scenarios.length}
-                </span>
-                <span className="text-white/80">
-                  {swipeResults.filter(r => r.choice === 'rizz').length} 💚 | {swipeResults.filter(r => r.choice === 'risk').length} ❤️
-                </span>
-              </div>
-              <div className="w-full bg-white/20 rounded-full h-2">
-                <div 
-                  className="bg-white h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${((currentCardIndex) / scenarios.length) * 100}%` }}
-                ></div>
+            <div className="feature-card group">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-600 to-purple-600 rounded-2xl blur opacity-10 group-hover:opacity-30 transition-opacity duration-300" />
+              <div className="relative bg-gray-900/90 backdrop-blur-sm border border-gray-800 rounded-2xl p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <span className="text-white font-black text-lg">
+                    card {currentCardIndex + 1} of {scenarios.length}
+                  </span>
+                  <span className="text-gray-400 font-bold">
+                    {swipeResults.filter(r => r.choice === 'rizz').length} 💚 | {swipeResults.filter(r => r.choice === 'risk').length} ❤️
+                  </span>
+                </div>
+                <div className="w-full bg-gray-800 rounded-full h-3">
+                  <div 
+                    className="bg-gradient-to-r from-purple-500 to-pink-500 h-3 rounded-full transition-all duration-500"
+                    style={{ width: `${((currentCardIndex) / scenarios.length) * 100}%` }}
+                  ></div>
+                </div>
               </div>
             </div>
 
             {/* Card */}
-            <div className="relative h-96 flex items-center justify-center">
+            <div className="relative h-[500px] flex items-center justify-center">
               <div 
                 ref={cardRef}
                 className={`
-                  bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md text-center
+                  feature-card group w-full max-w-lg
                   transform transition-all duration-300
                   ${cardAnimation === 'left' ? '-translate-x-full rotate-12 opacity-0' : ''}
                   ${cardAnimation === 'right' ? 'translate-x-full -rotate-12 opacity-0' : ''}
                 `}
               >
-                <div className="text-4xl mb-6">🤔</div>
-                <p className="text-gray-800 text-lg leading-relaxed mb-8">
-                  {scenarios[currentCardIndex]}
-                </p>
-                
-                <div className="flex justify-center space-x-6">
-                  <button
-                    onClick={() => handleSwipe('risk')}
-                    className="bg-red-500 hover:bg-red-600 text-white font-bold py-4 px-6 rounded-xl transition-colors flex items-center space-x-2"
-                  >
-                    <span>❤️</span>
-                    <span>Delulu Risk</span>
-                  </button>
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl blur opacity-20 group-hover:opacity-40 transition-opacity duration-300" />
+                <div className="relative bg-gray-900/95 backdrop-blur-sm border border-gray-800 rounded-2xl p-10 text-center">
+                  <div className="text-6xl mb-8">🤔</div>
+                  <p className="text-white text-xl leading-relaxed mb-12 font-medium">
+                    {scenarios[currentCardIndex]}
+                  </p>
                   
-                  <button
-                    onClick={() => handleSwipe('rizz')}
-                    className="bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-6 rounded-xl transition-colors flex items-center space-x-2"
-                  >
-                    <span>💚</span>
-                    <span>Valid Rizz</span>
-                  </button>
+                  <div className="flex justify-center gap-8">
+                    <button
+                      onClick={() => handleSwipe('risk')}
+                      className="group relative overflow-hidden bg-gradient-to-r from-red-600 to-red-500 text-white font-black py-6 px-8 rounded-xl transition-all duration-300 hover:scale-110 hover:shadow-2xl hover:shadow-red-500/25"
+                    >
+                      <span className="relative z-10 flex items-center gap-3 text-lg">
+                        <span>❤️</span>
+                        <span>delulu risk</span>
+                      </span>
+                      <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-red-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    </button>
+                    
+                    <button
+                      onClick={() => handleSwipe('rizz')}
+                      className="group relative overflow-hidden bg-gradient-to-r from-green-600 to-green-500 text-white font-black py-6 px-8 rounded-xl transition-all duration-300 hover:scale-110 hover:shadow-2xl hover:shadow-green-500/25"
+                    >
+                      <span className="relative z-10 flex items-center gap-3 text-lg">
+                        <span>💚</span>
+                        <span>valid rizz</span>
+                      </span>
+                      <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-green-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Instructions */}
             <div className="text-center">
-              <p className="text-white/70 text-sm">
-                💚 = This could actually be a sign they're interested
+              <p className="text-gray-400 text-sm leading-relaxed">
+                <span className="text-green-400 font-bold">💚 valid rizz</span> = this could actually mean they're interested
                 <br />
-                ❤️ = This is probably just you being delusional
+                <span className="text-red-400 font-bold">❤️ delulu risk</span> = bestie you're reading too much into this fr
               </p>
             </div>
           </div>
         )}
-
         {/* Results Phase */}
         {gameState === 'results' && (
-          <div className="space-y-6">
+          <div ref={resultsRef} className="space-y-8">
             {loading ? (
-              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-12 text-center">
-                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-white mx-auto mb-4"></div>
-                <p className="text-white text-lg">AI is judging your choices... 🤖</p>
+              <div className="feature-card group max-w-2xl mx-auto">
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl blur opacity-20 group-hover:opacity-40 transition-opacity duration-300" />
+                <div className="relative bg-gray-900/90 backdrop-blur-sm border border-gray-800 rounded-2xl p-16 text-center">
+                  <div className="relative mb-8">
+                    <div className="w-20 h-20 border-4 border-transparent border-t-purple-400 border-r-pink-400 rounded-full animate-spin mx-auto"></div>
+                    <div className="absolute top-2 left-1/2 transform -translate-x-1/2 w-16 h-16 border-4 border-transparent border-b-cyan-400 border-l-yellow-400 rounded-full animate-spin animate-reverse"></div>
+                  </div>
+                  <p className="text-white text-xl font-bold">AI is calculating your delulu level... 🤖</p>
+                  <p className="text-gray-400 mt-4">this might hurt bestie</p>
+                </div>
               </div>
             ) : aiJudgment && (
               <>
                 {/* AI Judgment */}
-                <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 text-center">
-                  <div className="text-6xl mb-4">🎭</div>
-                  <h2 className="text-2xl font-bold text-white mb-4">Your Delulu Diagnosis</h2>
-                  
-                  <div className="mb-6">
-                    <div className={`text-4xl font-bold ${getDeluluLevel(aiJudgment.deluluRating).color} mb-2`}>
-                      {getDeluluLevel(aiJudgment.deluluRating).emoji} {aiJudgment.deluluRating}/10
-                    </div>
-                    <div className={`text-lg font-semibold ${getDeluluLevel(aiJudgment.deluluRating).color}`}>
-                      {getDeluluLevel(aiJudgment.deluluRating).text}
-                    </div>
-                  </div>
-                  
-                  <div className="bg-white/10 rounded-lg p-6 mb-6">
-                    <p className="text-white text-lg">{aiJudgment.judgment}</p>
-                  </div>
-                  
-                  {/* Stats */}
-                  <div className="grid grid-cols-3 gap-4 mb-6">
-                    <div className="bg-white/10 rounded-lg p-4">
-                      <div className="text-2xl font-bold text-white">{swipeResults.length}</div>
-                      <div className="text-white/70 text-sm">Cards Swiped</div>
-                    </div>
-                    <div className="bg-green-500/20 rounded-lg p-4">
-                      <div className="text-2xl font-bold text-green-400">
-                        {swipeResults.filter(r => r.choice === 'rizz').length}
+                <div className="feature-card group max-w-3xl mx-auto">
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl blur opacity-20 group-hover:opacity-40 transition-opacity duration-300" />
+                  <div className="relative bg-gray-900/90 backdrop-blur-sm border border-gray-800 rounded-2xl p-12 text-center">
+                    <div className="text-8xl mb-6">🎭</div>
+                    <h2 className="text-3xl font-black text-white mb-6">your delulu diagnosis is in</h2>
+                    
+                    <div className="mb-8">
+                      <div className={`text-5xl font-black ${getDeluluLevel(aiJudgment.deluluRating).color} mb-3`}>
+                        {getDeluluLevel(aiJudgment.deluluRating).emoji} {aiJudgment.deluluRating}/10
                       </div>
-                      <div className="text-green-300 text-sm">Valid Rizz 💚</div>
-                    </div>
-                    <div className="bg-red-500/20 rounded-lg p-4">
-                      <div className="text-2xl font-bold text-red-400">
-                        {swipeResults.filter(r => r.choice === 'risk').length}
+                      <div className={`text-2xl font-bold ${getDeluluLevel(aiJudgment.deluluRating).color}`}>
+                        {getDeluluLevel(aiJudgment.deluluRating).text}
                       </div>
-                      <div className="text-red-300 text-sm">Delulu Risk ❤️</div>
+                    </div>
+                    
+                    <div className="bg-gray-800/40 rounded-xl p-8 mb-8 border border-gray-700">
+                      <p className="text-white text-lg leading-relaxed font-medium">{aiJudgment.judgment}</p>
+                    </div>
+                    
+                    {/* Stats */}
+                    <div className="grid grid-cols-3 gap-6 mb-8">
+                      <div className="bg-gray-800/40 rounded-xl p-6 border border-gray-700">
+                        <div className="text-3xl font-black text-white mb-2">{swipeResults.length}</div>
+                        <div className="text-gray-400 font-bold text-sm">cards swiped</div>
+                      </div>
+                      <div className="bg-green-500/10 rounded-xl p-6 border border-green-500/30">
+                        <div className="text-3xl font-black text-green-400 mb-2">
+                          {swipeResults.filter(r => r.choice === 'rizz').length}
+                        </div>
+                        <div className="text-green-300 font-bold text-sm">valid rizz 💚</div>
+                      </div>
+                      <div className="bg-red-500/10 rounded-xl p-6 border border-red-500/30">
+                        <div className="text-3xl font-black text-red-400 mb-2">
+                          {swipeResults.filter(r => r.choice === 'risk').length}
+                        </div>
+                        <div className="text-red-300 font-bold text-sm">delulu risk ❤️</div>
+                      </div>
                     </div>
                   </div>
                 </div>
-
                 {/* Action Buttons */}
-                <div className="flex justify-center space-x-4">
+                <div className="flex flex-col sm:flex-row justify-center gap-6 max-w-2xl mx-auto">
                   <button
                     onClick={resetGame}
-                    className="bg-white text-purple-600 font-bold py-3 px-6 rounded-xl hover:bg-gray-100 transition-colors"
+                    className="flex-1 bg-gray-800/60 text-white font-black py-4 px-8 rounded-xl hover:bg-gray-700/60 transition-all duration-200 border border-gray-700 hover:border-gray-600 text-lg"
                   >
-                    Play Again 🔄
+                    roast me again 🔥
                   </button>
                   
-                  <Link href="/dashboard">
-                    <div className="bg-purple-600 text-white font-bold py-3 px-6 rounded-xl hover:bg-purple-700 transition-colors">
-                      View Dashboard 📊
+                  <Link href="/dashboard" className="flex-1">
+                    <div className="w-full group relative overflow-hidden bg-gradient-to-r from-purple-600 to-pink-600 text-white font-black py-4 px-8 rounded-xl hover:scale-105 transition-all duration-200 text-center text-lg">
+                      <span className="relative z-10 flex items-center justify-center gap-3">
+                        <span>view delulu stats</span>
+                        <span>📊</span>
+                      </span>
+                      <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     </div>
                   </Link>
                 </div>
 
                 {/* Saved Notice */}
                 <div className="text-center">
-                  <p className="text-white/70 text-sm">
-                    ✅ Your results have been saved to your dashboard!
+                  <p className="text-gray-400 text-sm font-medium">
+                    <span className="text-green-400">✅</span> your delulu data has been saved to the dashboard (unfortunately)
                   </p>
                 </div>
               </>
@@ -399,6 +541,77 @@ const handleSubmit = async () => {
           </div>
         )}
       </div>
+
+      <style jsx>{`
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(50px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes float-0 {
+          0%, 100% { transform: translateY(0px) translateX(0px) rotate(0deg); }
+          33% { transform: translateY(-20px) translateX(10px) rotate(5deg); }
+          66% { transform: translateY(-10px) translateX(-5px) rotate(-2deg); }
+        }
+
+        @keyframes float-1 {
+          0%, 100% { transform: translateY(0px) translateX(0px) rotate(0deg); }
+          33% { transform: translateY(-15px) translateX(-10px) rotate(-5deg); }
+          66% { transform: translateY(-25px) translateX(5px) rotate(3deg); }
+        }
+
+        @keyframes float-2 {
+          0%, 100% { transform: translateY(0px) translateX(0px) rotate(0deg); }
+          33% { transform: translateY(-30px) translateX(15px) rotate(8deg); }
+          66% { transform: translateY(-5px) translateX(-10px) rotate(-4deg); }
+        }
+
+        @keyframes glitch {
+          0%, 100% { text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff, 0 0 15px #00ffff; }
+          25% { text-shadow: -2px 0 5px #ff00ff, 2px 0 10px #ff00ff, 0 0 15px #ff00ff; }
+          50% { text-shadow: 2px 0 5px #ffff00, -2px 0 10px #ffff00, 0 0 15px #ffff00; }
+          75% { text-shadow: 0 -2px 5px #00ff00, 0 2px 10px #00ff00, 0 0 15px #00ff00; }
+        }
+
+        .glitch-effect:hover {
+          animation: glitch 0.5s infinite;
+        }
+
+        .feature-card {
+          position: relative;
+          transition: all 0.3s ease;
+          cursor: pointer;
+        }
+
+        .feature-card:hover {
+          transform: translateY(-5px);
+        }
+
+        .nav-link {
+          color: white;
+          font-weight: 600;
+          text-decoration: none;
+          padding: 0.5rem 1rem;
+          border-radius: 12px;
+          transition: all 0.2s ease;
+          text-transform: lowercase;
+          font-size: 0.9rem;
+        }
+
+        .nav-link:hover {
+          background: rgba(139, 92, 246, 0.2);
+        }
+
+        .animate-reverse {
+          animation-direction: reverse;
+        }
+      `}</style>
     </div>
   );
 }

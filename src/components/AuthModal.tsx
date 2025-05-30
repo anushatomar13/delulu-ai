@@ -28,24 +28,21 @@ export default function AuthModal({
 
     try {
       if (mode === 'signup') {
-        const { data, error } = await supabase.auth.signUp({ 
-          email, 
+        const { data, error } = await supabase.auth.signUp({
+          email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback`
-          }
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
+          },
         });
-        
+
         if (error) throw error;
-        
+
         if (data?.user && !data.session) {
-          // Email confirmation required
           setSuccessMessage('Check your email for a confirmation link!');
-          // Reset form
           setEmail('');
           setPassword('');
         } else if (data?.session) {
-          // Auto sign-in happened
           setSuccessMessage('Account created successfully!');
           setTimeout(() => {
             onSuccess?.();
@@ -64,7 +61,6 @@ export default function AuthModal({
     }
   };
 
-  // Reset state when modal opens/closes
   const handleClose = () => {
     setError('');
     setSuccessMessage('');
@@ -77,30 +73,31 @@ export default function AuthModal({
 
   return (
     <>
-      {/* Blurred Background */}
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" onClick={handleClose}></div>
-      {/* Modal */}
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40" onClick={handleClose}></div>
       <div className="fixed inset-0 flex items-center justify-center z-50">
-        <div className="bg-white/90 rounded-2xl p-8 max-w-md w-full mx-4 shadow-xl" onClick={(e) => e.stopPropagation()}>
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            {mode === 'login' ? 'Sign In' : 'Sign Up'}
+        <div
+          className="bg-gradient-to-br from-gray-900 to-black border border-purple-500/60 rounded-2xl p-8 max-w-md w-full mx-4 shadow-[0_0_20px_rgba(128,0,255,0.3)] transition-all duration-300"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <h2 className="text-3xl font-extrabold text-purple-300 mb-6 text-center tracking-wide drop-shadow-md">
+            {mode === 'login' ? 'Welcome Back' : 'Create Account'}
           </h2>
-          
+
           {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <div className="bg-red-600/20 border border-red-400 text-red-300 px-4 py-3 rounded mb-4 text-sm">
               {error}
             </div>
           )}
-          
+
           {successMessage && (
-            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+            <div className="bg-green-600/20 border border-green-400 text-green-300 px-4 py-3 rounded mb-4 text-sm">
               {successMessage}
             </div>
           )}
-          
-          <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-purple-200 mb-1">
                 Email
               </label>
               <input
@@ -108,13 +105,13 @@ export default function AuthModal({
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full px-3 py-2 bg-gray-800 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 required
                 disabled={loading}
               />
             </div>
-            <div className="mb-6">
-              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-purple-200 mb-1">
                 Password
               </label>
               <input
@@ -122,24 +119,24 @@ export default function AuthModal({
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full px-3 py-2 bg-gray-800 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 required
                 disabled={loading}
                 minLength={6}
               />
               {mode === 'signup' && (
-                <p className="text-gray-500 text-xs mt-1">Password must be at least 6 characters</p>
+                <p className="text-gray-400 text-xs mt-1">Minimum 6 characters</p>
               )}
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="w-full bg-purple-700 hover:bg-purple-800 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-purple-700/40"
             >
-              {loading ? 'Loading...' : mode === 'login' ? 'Sign In' : 'Sign Up'}
+              {loading ? 'Processing...' : mode === 'login' ? 'Sign In' : 'Sign Up'}
             </button>
           </form>
-          
+
           <div className="mt-4 text-center">
             <button
               onClick={() => {
@@ -147,17 +144,17 @@ export default function AuthModal({
                 setError('');
                 setSuccessMessage('');
               }}
-              className="text-purple-600 hover:text-purple-800 font-medium transition-colors"
+              className="text-purple-400 hover:text-purple-200 font-medium transition duration-300"
               disabled={loading}
             >
               {mode === 'login' ? 'Need an account? Sign Up' : 'Already have an account? Sign In'}
             </button>
           </div>
-          
-          <div className="mt-6 pt-4 border-t border-gray-200">
+
+          <div className="mt-6 pt-4 border-t border-gray-700">
             <button
               onClick={handleClose}
-              className="w-full text-gray-500 hover:text-gray-700 font-medium transition-colors"
+              className="w-full text-gray-400 hover:text-white font-medium transition duration-300"
               disabled={loading}
             >
               Close
