@@ -1,45 +1,147 @@
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const { scenario } = await req.json();
-    
-    if (!scenario?.trim()) {
-      return Response.json(
-        { error: "Scenario text is required" },
-        { status: 400 }
-      );
+    const formData = await req.formData();
+    const scenario = formData.get('scenario') as string;
+    const file = formData.get('file') as File | null;
+
+    if (!scenario) {
+      return NextResponse.json({ error: "Scenario is required" }, { status: 400 });
     }
 
-    // Add rate limiting check here if needed
-    const analysisResult = await analyzeWithAI(scenario);
+    console.log("Received scenario:", scenario);
+    console.log("Received file:", file ? file.name : "No file uploaded");
 
-    return Response.json(analysisResult);
+    let topEmotions = [
+      { label: "neutral", score: 0.5 },
+      { label: "joy", score: 0.3 },
+      { label: "surprise", score: 0.2 }
+    ];
+    let classification = "⚖️ Neutral. Context matters.";
+    
+    try {
+      const hfResponse = await fetch(
+        "https://api-inference.huggingface.co/models/michellejieli/emotion_text_classifier",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
+          },
+          body: JSON.stringify({ inputs: scenario }),
+          signal: AbortSignal.timeout(5000),
+        }
+      );
+
+      if (hfResponse.ok) {
+        const hfData = await hfResponse.json();
+
+        if (Array.isArray(hfData) && Array.isArray(hfData[0]) && hfData[0].length > 0) {
+          topEmotions = hfData[0]
+            .sort((a: any, b: any) => b.score - a.score)
+            .slice(0, 3);
+
+          const redFlags = ["anger", "disgust", "fear", "sadness"];
+          const greenFlags = ["joy", "love", "surprise"];
+
+          const topEmotion = topEmotions[0].label;
+
+          if (redFlags.includes(topEmotion)) {
+            classification = "🚨 Red Flag! Be cautious.";
+          } else if (greenFlags.includes(topEmotion)) {
+            classification = "✅ Green Flag! Looks good.";
+          }
+        } else {
+          console.log("Using default emotions due to unexpected HF response format");
+        }
+      } else {
+        console.log("Using default emotions due to HF API error:", hfResponse.status);
+      }
+    } catch (error) {
+      console.error("Error with emotion analysis, using defaults:", error);
+    }
+
+    try {
+      const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "llama3-8b-8192",
+          messages: [
+            {
+              role: "user",
+            content: `You're a Gen Z bestie who gives brutally honest, funny, and slightly unhinged advice. Your friend just told you this crush scenario: "${scenario}". Based on the vibe, give them a reality check — is it delulu or realistic? Break it down casually, with emojis, slang, and a touch of sass. Keep it unfiltered like a TikTok rant. Include references to the emotions detected: ${topEmotions.map((e: any) => e.label).join(", ")}, but don’t sound like an AI. Just go off like you're voice-noting your bestie. End with a simple verdict: "Totally delulu" or "Not delulu, go for it".`
+
+
+            }
+          ],
+        }),
+        signal: AbortSignal.timeout(10000),
+      });
+
+      if (!groqResponse.ok) {
+        const errorText = await groqResponse.text();
+        console.error("Groq API error:", errorText);
+        
+        return NextResponse.json({
+          emotions: topEmotions,
+          classification,
+          groqMessage: "Sorry, I couldn't analyze your scenario right now. But it sounds like a mix of " + 
+                       topEmotions.map((e: any) => e.label).join(", ") + ". " + 
+                       "Based on this, " + classification + " Try again in a few moments?",
+          message: "Sorry, I couldn't analyze your scenario right now. Try again in a few moments?"
+        });
+      }
+
+      const groqData = await groqResponse.json();
+
+      if (!groqData.choices || groqData.choices.length === 0) {
+        return NextResponse.json({
+          emotions: topEmotions,
+          classification,
+          groqMessage: "Sorry, I couldn't analyze your scenario right now. But it sounds like a mix of " + 
+                       topEmotions.map((e: any) => e.label).join(", ") + ". " + 
+                       "Based on this, " + classification + " Try again in a few moments?",
+          message: "Sorry, I couldn't analyze your scenario right now. Try again in a few moments?"
+        });
+      }
+
+      const result = {
+        emotions: topEmotions,
+        classification,
+        groqMessage: groqData.choices[0].message.content,
+        message: groqData.choices[0].message.content 
+      };
+
+      return NextResponse.json(result);
+      
+    } catch (error) {
+      console.error("Groq API error:", error);
+      
+      return NextResponse.json({
+        emotions: topEmotions,
+        classification,
+        groqMessage: "Sorry, I couldn't analyze your scenario right now. But it sounds like a mix of " + 
+                     topEmotions.map((e: any) => e.label).join(", ") + ". " + 
+                     "Based on this, " + classification + " Try again in a few moments?",
+        message: "Sorry, I couldn't analyze your scenario right now. Try again in a few moments?"
+      });
+    }
+    
   } catch (error) {
-    console.error('API Error:', error);
-    return Response.json(
-      { error: error.message || "Internal server error" },
+    console.error("API route error:", error);
+    return NextResponse.json(
+      { 
+        error: "Error processing request", 
+        details: (error as Error).message,
+        message: "Sorry, something went wrong. Please try again later."
+      },
       { status: 500 }
     );
-  }
-}
-
-async function analyzeWithAI(scenario: string) {
-  try {
-    const groqResponse = await fetch('https://api.groq.com/analyze', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${process.env.GROQ_KEY}` },
-      body: JSON.stringify({ text: scenario }),
-    });
-
-    if (!groqResponse.ok) {
-      throw new Error(`AI service error: ${groqResponse.statusText}`);
-    }
-
-    return await groqResponse.json();
-  } catch (error) {
-    console.error('AI Service Error:', error);
-    throw new Error('Failed to analyze scenario with AI service');
   }
 }
 

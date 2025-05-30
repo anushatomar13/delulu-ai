@@ -17,6 +17,7 @@ export default function AnalyzePage() {
   const [scenario, setScenario] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+  const [ocrLoading, setOcrLoading] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState('');
   
@@ -36,10 +37,96 @@ export default function AnalyzePage() {
     getUser();
   }, [supabase, router]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const extractTextFromImage = async (imageFile: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      
+      img.onload = async () => {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx?.drawImage(img, 0, 0);
+        
+        try {
+          // Convert canvas to blob
+          canvas.toBlob(async (blob) => {
+            if (!blob) {
+              reject(new Error('Failed to process image'));
+              return;
+            }
+
+            // Create FormData for OCR API call
+            const formData = new FormData();
+            formData.append('file', blob, 'image.png');
+
+            try {
+              // Using OCR.space free API as an example
+              // You can replace this with other OCR services like Google Vision API, Azure Cognitive Services, etc.
+              const ocrResponse = await fetch('https://api.ocr.space/parse/image', {
+                method: 'POST',
+                headers: {
+                  'apikey': process.env.NEXT_PUBLIC_OCR_API_KEY || 'helloworld', // Free tier key
+                },
+                body: formData,
+              });
+
+              const ocrData = await ocrResponse.json();
+              
+              if (ocrData.ParsedResults && ocrData.ParsedResults.length > 0) {
+                const extractedText = ocrData.ParsedResults[0].ParsedText;
+                resolve(extractedText || '');
+              } else {
+                reject(new Error('No text found in image'));
+              }
+            } catch (error) {
+              reject(error);
+            }
+          }, 'image/png');
+        } catch (error) {
+          reject(error);
+        }
+      };
+
+      img.onerror = () => reject(new Error('Failed to load image'));
+      img.src = URL.createObjectURL(imageFile);
+    });
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
       setFile(selectedFile);
+      
+      // Check if it's an image file
+      if (selectedFile.type.startsWith('image/')) {
+        setOcrLoading(true);
+        setError('');
+        
+        try {
+          const extractedText = await extractTextFromImage(selectedFile);
+          if (extractedText.trim()) {
+            // Clean up the extracted text
+            const cleanedText = extractedText
+              .replace(/\r\n/g, ' ')
+              .replace(/\n/g, ' ')
+              .replace(/\s+/g, ' ')
+              .trim();
+            
+            // Add to existing scenario or replace it
+            if (scenario.trim()) {
+              setScenario(prev => prev + '\n\n' + cleanedText);
+            } else {
+              setScenario(cleanedText);
+            }
+          }
+        } catch (err) {
+          console.error('OCR Error:', err);
+          setError('Could not extract text from image. You can still analyze the image or type your scenario manually.');
+        } finally {
+          setOcrLoading(false);
+        }
+      }
     }
   };
 
@@ -181,26 +268,43 @@ export default function AnalyzePage() {
                 <textarea
                   value={scenario}
                   onChange={(e) => setScenario(e.target.value)}
-                  placeholder="e.g., 'They liked my Instagram story from 3 weeks ago at 2 AM. We're basically dating now, right?'"
+                  placeholder="e.g., 'They liked my Instagram story from 3 weeks ago at 2 AM. We're basically dating now, right?' Or upload an image and text will be extracted automatically!"
                   className="w-full h-32 p-4 rounded-lg bg-white/20 text-white placeholder-white/60 border border-white/30 focus:outline-none focus:ring-2 focus:ring-white/50"
                   rows={4}
                 />
+                {ocrLoading && (
+                  <div className="flex items-center space-x-2 mt-2 text-white/80">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <span className="text-sm">Extracting text from image...</span>
+                  </div>
+                )}
               </div>
 
               <div>
                 <label className="block text-white text-sm font-medium mb-2">
-                  Or upload a screenshot (optional):
+                  Upload a screenshot:
                 </label>
+                <div className="text-white/70 text-xs mb-2">
+                  💡 Upload an image and we'll automatically extract any text to analyze!
+                </div>
                 <input
                   type="file"
                   onChange={handleFileChange}
                   accept="image/*"
-                  className="w-full p-3 rounded-lg bg-white/20 text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-white file:text-purple-600 hover:file:bg-gray-100"
+                  disabled={ocrLoading}
+                  className="w-full p-3 rounded-lg bg-white/20 text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-white file:text-purple-600 hover:file:bg-gray-100 disabled:opacity-50"
                 />
                 {file && (
-                  <p className="text-white/80 text-sm mt-2">
-                    Selected: {file.name}
-                  </p>
+                  <div className="mt-2 space-y-1">
+                    <p className="text-white/80 text-sm">
+                      Selected: {file.name}
+                    </p>
+                    {file.type.startsWith('image/') && (
+                      <p className="text-green-200 text-xs">
+                        ✅ Image detected - text will be extracted automatically
+                      </p>
+                    )}
+                  </div>
                 )}
               </div>
 
@@ -212,13 +316,18 @@ export default function AnalyzePage() {
 
               <button
                 onClick={handleAnalyze}
-                disabled={loading || (!scenario.trim() && !file)}
+                disabled={loading || ocrLoading || (!scenario.trim() && !file)}
                 className="w-full bg-white text-purple-600 font-semibold py-4 px-6 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <div className="flex items-center justify-center space-x-2">
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-purple-600"></div>
                     <span>Analyzing...</span>
+                  </div>
+                ) : ocrLoading ? (
+                  <div className="flex items-center justify-center space-x-2">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-purple-600"></div>
+                    <span>Processing Image...</span>
                   </div>
                 ) : (
                   'Analyze This 🔮'
@@ -295,6 +404,9 @@ export default function AnalyzePage() {
                 <div className="text-6xl mb-4">🤖</div>
                 <p>AI is ready to analyze your scenario...</p>
                 <p className="text-sm mt-2">Fill out the form and hit analyze!</p>
+                <p className="text-xs mt-3 text-white/50">
+                  💡 Tip: Upload an image with text and we'll extract it automatically!
+                </p>
               </div>
             )}
           </div>

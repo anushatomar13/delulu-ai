@@ -4,12 +4,13 @@ import { useState, useEffect } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { User } from '@supabase/supabase-js';
 import Link from 'next/link';
+import AuthModal from '@/components/AuthModal';
 
 export default function HomePage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [signingIn, setSigningIn] = useState(false);
-  
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
   const supabase = createClientComponentClient();
 
   useEffect(() => {
@@ -29,25 +30,6 @@ export default function HomePage() {
     return () => subscription.unsubscribe();
   }, [supabase]);
 
-  const signInWithGoogle = async () => {
-    setSigningIn(true);
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-        },
-      });
-      if (error) {
-        console.error('Error signing in:', error);
-        setSigningIn(false);
-      }
-    } catch (error) {
-      console.error('Sign in error:', error);
-      setSigningIn(false);
-    }
-  };
-
   const signOut = async () => {
     await supabase.auth.signOut();
   };
@@ -63,9 +45,15 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-400 via-purple-500 to-indigo-600">
       {/* Navigation */}
-      {user && (
-        <nav className="p-4">
-          <div className="container mx-auto flex justify-between items-center">
+      <nav className="p-4">
+        <div className="container mx-auto flex justify-between items-center">
+          <button
+            onClick={() => setShowAuthModal(true)}
+            className="text-white hover:text-gray-200 font-semibold"
+          >
+            {user ? '👤 Profile' : '🔑 Sign In'}
+          </button>
+          {user && (
             <div className="flex space-x-4">
               <Link href="/analyze" className="text-white hover:text-gray-200 font-semibold">
                 📝 Analyze Text
@@ -76,16 +64,16 @@ export default function HomePage() {
               <Link href="/dashboard" className="text-white hover:text-gray-200 font-semibold">
                 📊 Dashboard
               </Link>
+              <button
+                onClick={signOut}
+                className="text-white hover:text-gray-200 font-semibold"
+              >
+                Sign Out
+              </button>
             </div>
-            <button
-              onClick={signOut}
-              className="text-white hover:text-gray-200 text-sm"
-            >
-              Sign Out
-            </button>
-          </div>
-        </nav>
-      )}
+          )}
+        </div>
+      </nav>
 
       {/* Main Content */}
       <div className="flex items-center justify-center min-h-screen p-4">
@@ -109,21 +97,11 @@ export default function HomePage() {
                 Ready to discover your delulu level?
               </h2>
               <button
-                onClick={signInWithGoogle}
-                disabled={signingIn}
-                className="bg-white text-purple-600 font-bold py-4 px-8 rounded-xl hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-3 mx-auto"
+                onClick={() => setShowAuthModal(true)}
+                className="bg-white text-purple-600 font-bold py-4 px-8 rounded-xl hover:bg-gray-100 transition-colors flex items-center space-x-3 mx-auto"
               >
-                {signingIn ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-purple-600"></div>
-                    <span>Signing in...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>🚀</span>
-                    <span>Sign in with Google</span>
-                  </>
-                )}
+                <span>🔑</span>
+                <span>Sign In / Sign Up</span>
               </button>
               <p className="text-white/70 text-sm mt-4">
                 Sign in to save your results and unlock shareable badges!
@@ -136,10 +114,7 @@ export default function HomePage() {
                 <h2 className="text-2xl font-bold text-white mb-6">
                   Welcome back! What's your delulu mood today?
                 </h2>
-                
-                {/* Action Cards */}
                 <div className="grid md:grid-cols-2 gap-6">
-                  {/* Analyze Text Card */}
                   <Link href="/analyze">
                     <div className="bg-white/10 hover:bg-white/20 rounded-xl p-6 transition-all transform hover:scale-105 cursor-pointer">
                       <div className="text-4xl mb-4">📝</div>
@@ -152,9 +127,7 @@ export default function HomePage() {
                       </div>
                     </div>
                   </Link>
-                  
-                  {/* Swipe Game Card */}
-                  <Link href="/red-or-green">
+                  <Link href="/swipe">
                     <div className="bg-white/10 hover:bg-white/20 rounded-xl p-6 transition-all transform hover:scale-105 cursor-pointer">
                       <div className="text-4xl mb-4">🎮</div>
                       <h3 className="text-xl font-bold text-white mb-2">Swipe Challenge</h3>
@@ -168,8 +141,6 @@ export default function HomePage() {
                   </Link>
                 </div>
               </div>
-
-              {/* Quick Dashboard Link */}
               <div className="bg-white/5 backdrop-blur-md rounded-xl p-6 text-center">
                 <p className="text-white/80 mb-4">
                   Ready to see your delulu journey?
@@ -192,7 +163,6 @@ export default function HomePage() {
                 Advanced AI analyzes your scenarios and gives brutally honest feedback
               </p>
             </div>
-            
             <div className="bg-white/5 backdrop-blur-md rounded-xl p-6 text-center">
               <div className="text-3xl mb-3">🏆</div>
               <h3 className="text-lg font-semibold text-white mb-2">Unlock Badges</h3>
@@ -200,7 +170,6 @@ export default function HomePage() {
                 Get shareable badges after every 3 analyses to flex your delulu level
               </p>
             </div>
-            
             <div className="bg-white/5 backdrop-blur-md rounded-xl p-6 text-center">
               <div className="text-3xl mb-3">📊</div>
               <h3 className="text-lg font-semibold text-white mb-2">Track Progress</h3>
@@ -218,6 +187,13 @@ export default function HomePage() {
           </div>
         </div>
       </div>
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onSuccess={() => setShowAuthModal(false)}
+      />
     </div>
   );
 }
