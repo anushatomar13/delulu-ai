@@ -15,6 +15,15 @@ interface StoredResponse {
   timestamp: string;
 }
 
+const milestones = [
+  { threshold: 3, name: "Delulu Debut", description: "First badge – shows commitment" },
+  { threshold: 5, name: "Rizz Rookie", description: "You're on your way" },
+  { threshold: 10, name: "Certified Delusionist", description: "You've earned your stripes" },
+  { threshold: 20, name: "Risk Master", description: "Consistency and effort" },
+  { threshold: 50, name: "Reality Challenger", description: "Significant engagement" },
+  { threshold: 100, name: "Grand Delusion", description: "Ultimate badge – top-tier recognition" }
+];
+
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null);
   const [responses, setResponses] = useState<StoredResponse[]>([]);
@@ -22,10 +31,13 @@ export default function DashboardPage() {
   
   const supabase = createClientComponentClient();
   const router = useRouter();
-  const responseCount = responses.length;
-const redFlags = responses.filter(r => r.classification.includes('Red Flag')).length;
-const greenFlags = responses.filter(r => r.classification.includes('Green Flag')).length;
 
+  const achievedMilestones = milestones
+    .filter(m => responses.length >= m.threshold)
+    .sort((a, b) => b.threshold - a.threshold);
+
+  const redFlags = responses.filter(r => r.classification.includes('Red Flag')).length;
+  const greenFlags = responses.filter(r => r.classification.includes('Green Flag')).length;
 
   useEffect(() => {
     const getUser = async () => {
@@ -49,7 +61,7 @@ const greenFlags = responses.filter(r => r.classification.includes('Green Flag')
         .eq('id', userId)
         .single();
 
-      if (error && error.code !== 'PGRST116') { // PGRST116 is "not found"
+      if (error && error.code !== 'P2025' && error.code !== 'PGRST116') { // Not found error codes
         console.error('Error fetching responses:', error);
         setLoading(false);
         return;
@@ -91,55 +103,6 @@ const greenFlags = responses.filter(r => r.classification.includes('Green Flag')
     });
   };
 
-  const downloadBadge = () => {
-    // Create a simple badge image download
-    const canvas = document.createElement('canvas');
-    canvas.width = 600;
-    canvas.height = 600;
-    const ctx = canvas.getContext('2d');
-    
-    if (ctx) {
-      // Background gradient
-      const gradient = ctx.createRadialGradient(300, 300, 0, 300, 300, 300);
-      gradient.addColorStop(0, '#ec4899');
-      gradient.addColorStop(0.5, '#8b5cf6');
-      gradient.addColorStop(1, '#4f46e5');
-      
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, 600, 600);
-      
-      // Badge content
-      ctx.fillStyle = 'white';
-      ctx.font = 'bold 32px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText('🌀', 300, 150);
-      
-      ctx.font = 'bold 28px Arial';
-      ctx.fillText("I've been pretty", 300, 250);
-      ctx.fillText('delusional', 300, 290);
-      
-      ctx.font = '20px Arial';
-      ctx.fillText('Check if you are on', 300, 380);
-      ctx.font = 'bold 24px Arial';
-      ctx.fillText('Rizz or Risk AI', 300, 420);
-      
-      ctx.font = '16px Arial';
-      ctx.fillText(`${responses.length} scenarios analyzed`, 300, 500);
-      
-      // Download
-      canvas.toBlob((blob) => {
-        if (blob) {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = 'rizz-or-risk-badge.png';
-          a.click();
-          URL.revokeObjectURL(url);
-        }
-      });
-    }
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-pink-400 via-purple-500 to-indigo-600 flex items-center justify-center">
@@ -159,7 +122,6 @@ const greenFlags = responses.filter(r => r.classification.includes('Green Flag')
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-400 via-purple-500 to-indigo-600 p-4">
       <div className="container mx-auto max-w-6xl">
-        {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <Link href="/" className="text-white hover:text-gray-200 flex items-center space-x-2">
             <span>←</span>
@@ -172,7 +134,6 @@ const greenFlags = responses.filter(r => r.classification.includes('Green Flag')
           </Link>
         </div>
 
-        {/* Stats & Badge */}
         <div className="grid md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 text-center">
             <div className="text-3xl font-bold text-white">{responses.length}</div>
@@ -180,39 +141,85 @@ const greenFlags = responses.filter(r => r.classification.includes('Green Flag')
           </div>
           
           <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 text-center">
-            <div className="text-3xl font-bold text-white">
-              {responses.filter(r => r.classification.includes('Red Flag')).length}
-            </div>
+            <div className="text-3xl font-bold text-white">{redFlags}</div>
             <p className="text-white/80">Red Flags 🚨</p>
           </div>
           
           <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 text-center">
-            <div className="text-3xl font-bold text-white">
-              {responses.filter(r => r.classification.includes('Green Flag')).length}
-            </div>
+            <div className="text-3xl font-bold text-white">{greenFlags}</div>
             <p className="text-white/80">Green Flags ✅</p>
           </div>
         </div>
 
-        {/* Badge Section */}
-       {responses.length >= 3 && (
-  <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 mb-8">
-    <div className="text-center mb-6">
-      <div className="text-6xl mb-4">🏆</div>
-      <h3 className="text-2xl font-bold text-white mb-4">Achievement Unlocked!</h3>
-      <p className="text-white/80 mb-6">
-        You've analyzed enough scenarios to unlock your delulu badge!
-      </p>
-    </div>
-    <ShareableBadge
-      responseCount={responseCount}
-      redFlags={redFlags}
-      greenFlags={greenFlags}
-    />
-  </div>
-)}
+        {responses.length > 0 && (
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 mb-8">
+            <div className="text-center mb-6">
+              <div className="text-6xl mb-4">🏆</div>
+              <h3 className="text-2xl font-bold text-white mb-4">Milestone Progress</h3>
+            </div>
 
-        {/* Responses List */}
+            {achievedMilestones.length > 0 && (
+              <>
+                <div className="bg-gradient-to-br from-pink-500 to-purple-600 rounded-2xl p-6 mb-8">
+                  <h4 className="text-xl font-bold text-white mb-2">Latest Achievement</h4>
+                  <ShareableBadge
+                    responseCount={responses.length}
+                    redFlags={redFlags}
+                    greenFlags={greenFlags}
+                    badgeName={achievedMilestones[0].name}
+                    badgeDescription={achievedMilestones[0].description}
+                    isCurrent={true}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {achievedMilestones.slice(1).map((milestone, index) => (
+                    <ShareableBadge
+                      key={index}
+                      responseCount={milestone.threshold}
+                      redFlags={0}
+                      greenFlags={0}
+                      badgeName={milestone.name}
+                      badgeDescription={milestone.description}
+                      isCurrent={false}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+
+            <div className="mt-8 pt-6 border-t border-white/20">
+              <h4 className="text-lg font-semibold text-white mb-4">Next Milestones</h4>
+              <div className="grid grid-cols-2 gap-4">
+                {milestones
+                  .filter(m => responses.length < m.threshold)
+                  .slice(0, 4)
+                  .map((milestone, index) => (
+                    <div key={index} className="bg-white/5 rounded-lg p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-white font-semibold">{milestone.name}</p>
+                          <p className="text-white/60 text-sm">{milestone.description}</p>
+                        </div>
+                        <span className="text-white/40 text-sm">
+                          {milestone.threshold - responses.length} to go
+                        </span>
+                      </div>
+                      <div className="mt-2 h-1 bg-white/10 rounded-full">
+                        <div 
+                          className="h-full bg-gradient-to-r from-pink-500 to-purple-500 rounded-full"
+                          style={{
+                            width: `${Math.min((responses.length / milestone.threshold) * 100, 100)}%`
+                          }}
+                        ></div>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="space-y-6">
           <h2 className="text-2xl font-bold text-white mb-4">Your Analysis History</h2>
           
@@ -273,7 +280,6 @@ const greenFlags = responses.filter(r => r.classification.includes('Green Flag')
           )}
         </div>
 
-        {/* Footer CTA */}
         {responses.length > 0 && responses.length < 3 && (
           <div className="text-center mt-12 bg-white/10 backdrop-blur-md rounded-2xl p-8">
             <h3 className="text-xl font-semibold text-white mb-2">
