@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { useUser } from '@supabase/auth-helpers-react';
 import { useRouter } from 'next/navigation';
 
+
 interface Card {
   id: number;
   scenario: string;
@@ -54,6 +55,20 @@ const CardSwipePage: React.FC = () => {
     }
     setCards(generateCards());
   }, [user, router]);
+
+
+  // Add realtime subscription
+useEffect(() => {
+  const channel = supabase
+    .channel('swipe-results')
+    .on('postgres_changes', { 
+      event: 'INSERT', 
+      schema: 'public' 
+    }, () => fetchUserResponses())
+    .subscribe();
+
+  return () => { supabase.removeChannel(channel) };
+}, [user]);
 
   const handleSwipe = (direction: 'rizz' | 'risk') => {
     const currentCard = cards[currentCardIndex];
@@ -138,7 +153,7 @@ const CardSwipePage: React.FC = () => {
           result: judgment,
           delulu_rating: rating,
           scenario_text: `Card Swipe Game - ${results.length} scenarios completed`,
-          card_choices: results
+card_choices: JSON.stringify(results)
         });
 
       if (error) {
@@ -202,6 +217,7 @@ const CardSwipePage: React.FC = () => {
       </div>
     );
   }
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-600 to-blue-600 p-4">

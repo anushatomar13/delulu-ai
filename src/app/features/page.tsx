@@ -4,6 +4,7 @@ import React, { useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, useMotionTemplate, useMotionValue, useSpring } from 'framer-motion';
 import { FiMousePointer, FiStar, FiZap } from 'react-icons/fi';
+import ProtectedRoute from '@/components/ProtectedRoute';
 import { gsap } from 'gsap';
 
 const Features = () => {
@@ -68,6 +69,8 @@ const Features = () => {
   }, []);
 
   return (
+    
+    
     <div ref={containerRef} className="min-h-screen bg-black relative overflow-hidden flex flex-col items-center justify-center gap-12 px-4 py-12">
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-20 left-20 w-2 h-2 bg-purple-500 rounded-full particle"></div>
@@ -233,4 +236,10 @@ const TiltCard = React.forwardRef<HTMLDivElement, TiltCardProps>(({ title, subti
 
 TiltCard.displayName = 'TiltCard';
 
-export default Features;
+export default function ProtectedFeaturesWrapper() {
+  return (
+    <ProtectedRoute>
+      <Features />
+    </ProtectedRoute>
+  );
+}
