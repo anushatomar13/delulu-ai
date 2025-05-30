@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import SupabaseProvider from './components/SupabaseProvider';
-import Navbar from '@/components/Navbar';
+
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -31,14 +30,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} bg-black text-white`}>
-        <SupabaseProvider>
           <div className="min-h-screen">
-            <Navbar />
             <main className="relative">
               {children}
             </main>
           </div>
-        </SupabaseProvider>
       </body>
     </html>
   );
