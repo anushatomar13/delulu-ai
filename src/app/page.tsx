@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef,ReactNode } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { User } from '@supabase/supabase-js';
 import Link from 'next/link';
@@ -461,8 +461,8 @@ export default function HomePage() {
 interface FeatureCardProps {
   icon: string;
   title: string;
-  description: string;
-  gradient: string;
+
+description: ReactNode;  gradient: string;
 }
 
 const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, description, gradient }) => {
