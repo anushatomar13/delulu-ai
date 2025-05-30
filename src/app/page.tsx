@@ -98,31 +98,40 @@ export default function HomePage() {
   return (
     <div ref={containerRef} className="min-h-screen bg-black text-white overflow-hidden relative">
       {/* Animated Background Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div
-          ref={(el) => (floatingRefs.current[0] = el)}
-          className="absolute top-10 left-10 w-72 h-72 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-full blur-3xl"
-        />
-        <div
-          ref={(el) => (floatingRefs.current[1] = el)}
-          className="absolute top-1/3 right-20 w-96 h-96 bg-gradient-to-r from-cyan-600/20 to-blue-600/20 rounded-full blur-3xl"
-        />
-        <div
-          ref={(el) => (floatingRefs.current[2] = el)}
-          className="absolute bottom-20 left-1/4 w-64 h-64 bg-gradient-to-r from-yellow-600/20 to-orange-600/20 rounded-full blur-3xl"
-        />
-        {[...Array(20)].map((_, i) => (
-          <div
-            key={i}
-            ref={(el) => (floatingRefs.current[i + 3] = el)}
-            className="absolute w-1 h-1 bg-white/30 rounded-full"
-            style={{
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-            }}
-          />
-        ))}
-      </div>
+    <div className="absolute inset-0 overflow-hidden">
+  <div
+    ref={(el) => {
+      floatingRefs.current[0] = el;
+    }}
+    className="absolute top-10 left-10 w-72 h-72 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-full blur-3xl"
+  />
+  <div
+    ref={(el) => {
+      floatingRefs.current[1] = el;
+    }}
+    className="absolute top-1/3 right-20 w-96 h-96 bg-gradient-to-r from-cyan-600/20 to-blue-600/20 rounded-full blur-3xl"
+  />
+  <div
+    ref={(el) => {
+      floatingRefs.current[2] = el;
+    }}
+    className="absolute bottom-20 left-1/4 w-64 h-64 bg-gradient-to-r from-yellow-600/20 to-orange-600/20 rounded-full blur-3xl"
+  />
+  {[...Array(20)].map((_, i) => (
+    <div
+      key={i}
+      ref={(el) => {
+        floatingRefs.current[i + 3] = el;
+      }}
+      className="absolute w-1 h-1 bg-white/30 rounded-full"
+      style={{
+        top: `${Math.random() * 100}%`,
+        left: `${Math.random() * 100}%`,
+      }}
+    />
+  ))}
+</div>
+
 
       {/* Navigation */}
       <nav className="relative z-50 flex items-center justify-between p-6 backdrop-blur-sm bg-gray-900/20 border-b border-gray-800/50">
