@@ -74,9 +74,7 @@ export async function POST(req: NextRequest) {
           messages: [
             {
               role: "user",
-            content: `You're a Gen Z bestie who gives brutally honest, funny, and slightly unhinged advice. Your friend just told you this crush scenario: "${scenario}". Based on the vibe, give them a reality check — is it delulu or realistic? Break it down casually, with emojis, slang, and a touch of sass. Keep it unfiltered like a TikTok rant. Include references to the emotions detected: ${topEmotions.map((e: any) => e.label).join(", ")}, but don’t sound like an AI. Just go off like you're voice-noting your bestie. End with a simple verdict: "Totally delulu" or "Not delulu, go for it".`
-
-
+            content: `You're a Gen Z bestie who gives brutally honest, funny, and slightly unhinged advice. Your friend just told you this crush scenario: "${scenario}". Based on the vibe, give them a reality check — is it delulu or realistic? Break it down casually, with emojis, slang, and a touch of sass. Keep it unfiltered like a TikTok rant. Include references to the emotions detected: ${topEmotions.map((e: any) => e.label).join(", ")}, but don't sound like an AI. Just go off like you're voice-noting your bestie. End with a simple verdict: "Totally delulu" or "Not delulu, go for it".`
             }
           ],
         }),
@@ -87,34 +85,41 @@ export async function POST(req: NextRequest) {
         const errorText = await groqResponse.text();
         console.error("Groq API error:", errorText);
         
+        // Return error response without 'message' field to prevent dashboard storage
         return NextResponse.json({
+          error: "AI service temporarily unavailable",
           emotions: topEmotions,
           classification,
-          groqMessage: "Sorry, I couldn't analyze your scenario right now. But it sounds like a mix of " + 
+          errorMessage: "Sorry, I couldn't analyze your scenario right now. But it sounds like a mix of " + 
                        topEmotions.map((e: any) => e.label).join(", ") + ". " + 
                        "Based on this, " + classification + " Try again in a few moments?",
-          message: "Sorry, I couldn't analyze your scenario right now. Try again in a few moments?"
-        });
+          // Note: No 'message' field here, so it won't be stored in dashboard
+          success: false
+        }, { status: 503 });
       }
 
       const groqData = await groqResponse.json();
 
       if (!groqData.choices || groqData.choices.length === 0) {
+        // Return error response without 'message' field
         return NextResponse.json({
+          error: "AI service returned invalid response",
           emotions: topEmotions,
           classification,
-          groqMessage: "Sorry, I couldn't analyze your scenario right now. But it sounds like a mix of " + 
+          errorMessage: "Sorry, I couldn't analyze your scenario right now. But it sounds like a mix of " + 
                        topEmotions.map((e: any) => e.label).join(", ") + ". " + 
                        "Based on this, " + classification + " Try again in a few moments?",
-          message: "Sorry, I couldn't analyze your scenario right now. Try again in a few moments?"
-        });
+          success: false
+        }, { status: 503 });
       }
 
+      // SUCCESS CASE - Only this will have the 'message' field and get stored
       const result = {
         emotions: topEmotions,
         classification,
         groqMessage: groqData.choices[0].message.content,
-        message: groqData.choices[0].message.content 
+        message: groqData.choices[0].message.content, // This indicates successful analysis
+        success: true
       };
 
       return NextResponse.json(result);
@@ -122,14 +127,16 @@ export async function POST(req: NextRequest) {
     } catch (error) {
       console.error("Groq API error:", error);
       
+      // Return error response without 'message' field
       return NextResponse.json({
+        error: "Network error while processing request",
         emotions: topEmotions,
         classification,
-        groqMessage: "Sorry, I couldn't analyze your scenario right now. But it sounds like a mix of " + 
+        errorMessage: "Sorry, I couldn't analyze your scenario right now. But it sounds like a mix of " + 
                      topEmotions.map((e: any) => e.label).join(", ") + ". " + 
                      "Based on this, " + classification + " Try again in a few moments?",
-        message: "Sorry, I couldn't analyze your scenario right now. Try again in a few moments?"
-      });
+        success: false
+      }, { status: 503 });
     }
     
   } catch (error) {
@@ -138,7 +145,9 @@ export async function POST(req: NextRequest) {
       { 
         error: "Error processing request", 
         details: (error as Error).message,
-        message: "Sorry, something went wrong. Please try again later."
+        errorMessage: "Sorry, something went wrong. Please try again later.",
+        success: false
+        // Note: No 'message' field here either
       },
       { status: 500 }
     );
