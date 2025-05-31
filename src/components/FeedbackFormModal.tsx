@@ -11,7 +11,6 @@ const FeedbackFormModal: React.FC<FeedbackFormModalProps> = ({ isOpen, onClose }
   const modalRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
 
-  // Initialize EmailJS when component mounts
   useEffect(() => {
     emailjs.init('xYEOOVmxPGh4ooecL');
   }, []);
@@ -25,11 +24,11 @@ const FeedbackFormModal: React.FC<FeedbackFormModalProps> = ({ isOpen, onClose }
       );
       gsap.fromTo(
         modalRef.current,
-        { scale: 0.8, autoAlpha: 0 },
-        { duration: 0.5, scale: 1, autoAlpha: 1, ease: 'power3.out' }
+        { y: 100, autoAlpha: 0 },
+        { duration: 0.5, y: 0, autoAlpha: 1, ease: 'power3.out' }
       );
     } else if (!isOpen && modalRef.current && overlayRef.current) {
-      gsap.to(modalRef.current, { duration: 0.3, scale: 0.8, autoAlpha: 0 });
+      gsap.to(modalRef.current, { duration: 0.3, y: 100, autoAlpha: 0 });
       gsap.to(overlayRef.current, { duration: 0.3, autoAlpha: 0 });
     }
   }, [isOpen]);
@@ -48,14 +47,13 @@ const FeedbackFormModal: React.FC<FeedbackFormModalProps> = ({ isOpen, onClose }
     setError('');
     setSending(true);
 
-    const templateParams = {
-      user_name: name,
-      message: message,
-    };
-
     try {
-      // Fixed: removed duplicate emailjs and added proper error handling
-      await emailjs.send('service_8zxj0fc', 'template_i9ox1sq', templateParams, 'xYEOOVmxPGh4ooecL');
+      await emailjs.send(
+        'service_8zxj0fc',
+        'template_i9ox1sq',
+        { user_name: name, message },
+        'xYEOOVmxPGh4ooecL'
+      );
       
       alert(`Thanks, ${name}! Your message has been received.`);
       setName('');
@@ -73,30 +71,38 @@ const FeedbackFormModal: React.FC<FeedbackFormModalProps> = ({ isOpen, onClose }
     <>
       <div
         ref={overlayRef}
-        className="fixed inset-0 bg-black bg-opacity-80"
-        style={{ pointerEvents: isOpen ? 'auto' : 'none', opacity: 0 }}
+        className="fixed inset-0 bg-black/80 backdrop-blur-sm"
+        style={{ 
+          pointerEvents: isOpen ? 'auto' : 'none', 
+          opacity: 0,
+          touchAction: 'none' // Prevent iOS scroll bounce
+        }}
         onClick={onClose}
       />
 
       <div
         ref={modalRef}
-        className="fixed top-1/2 left-1/2 max-w-md w-full bg-gray-900 text-white rounded-lg p-6 shadow-lg"
+        className="fixed top-4 sm:top-1/2 left-1/2 -translate-x-1/2 sm:-translate-y-1/2
+                  w-[calc(100%-2rem)] sm:w-full max-w-md 
+                  bg-gray-900 text-white rounded-lg p-4 sm:p-6 shadow-xl
+                  max-h-[90vh] overflow-y-auto"
         style={{
-          transform: 'translate(-50%, -50%)',
           opacity: 0,
           pointerEvents: isOpen ? 'auto' : 'none',
           zIndex: 50,
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-2xl font-semibold mb-4">Send Feedback</h2>
+        <h2 className="text-xl sm:text-2xl font-semibold mb-4">Send Feedback</h2>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <input
             type="text"
             placeholder="Your Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="bg-gray-800 border border-gray-700 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-fuchsia-500"
+            className="bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 sm:px-3 sm:py-2
+                       focus:outline-none focus:ring-2 focus:ring-fuchsia-500
+                       text-base sm:text-sm placeholder-gray-400"
             disabled={sending}
             required
           />
@@ -104,27 +110,35 @@ const FeedbackFormModal: React.FC<FeedbackFormModalProps> = ({ isOpen, onClose }
             placeholder="Your Message"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            className="bg-gray-800 border border-gray-700 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-fuchsia-500 resize-y"
-            rows={4}
+            className="bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 sm:px-3 sm:py-2
+                       focus:outline-none focus:ring-2 focus:ring-fuchsia-500 resize-none
+                       text-base sm:text-sm placeholder-gray-400 min-h-[120px]"
             disabled={sending}
             required
           />
-          {error && <p className="text-red-500 text-sm">{error}</p>}
-          <div className="flex justify-end gap-2">
+          {error && <p className="text-red-400 text-sm">{error}</p>}
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded bg-gray-700 hover:bg-gray-600"
+              className="px-4 py-3 sm:py-2 rounded-lg bg-gray-700 hover:bg-gray-600/80
+                         transition-colors text-sm font-medium min-h-[44px]"
               disabled={sending}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 rounded bg-fuchsia-600 text-white hover:bg-fuchsia-700 disabled:opacity-50"
+              className="px-4 py-3 sm:py-2 rounded-lg bg-fuchsia-600 hover:bg-fuchsia-700
+                         transition-colors text-sm font-medium min-h-[44px] disabled:opacity-50"
               disabled={sending}
             >
-              {sending ? 'Sending...' : 'Send'}
+              {sending ? (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white/50 border-t-white rounded-full animate-spin" />
+                  <span>Sending...</span>
+                </div>
+              ) : 'Send'}
             </button>
           </div>
         </form>

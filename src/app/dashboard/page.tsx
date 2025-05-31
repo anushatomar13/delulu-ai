@@ -156,10 +156,10 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center p-4">
         <div className="relative">
-          <div className="w-20 h-20 border-4 border-transparent border-t-cyan-400 border-r-purple-500 rounded-full animate-spin"></div>
-          <div className="absolute top-2 left-2 w-16 h-16 border-4 border-transparent border-b-pink-400 border-l-yellow-400 rounded-full animate-spin animate-reverse"></div>
+          <div className="w-16 h-16 sm:w-20 sm:h-20 border-4 border-transparent border-t-cyan-400 border-r-purple-500 rounded-full animate-spin"></div>
+          <div className="absolute top-1 left-1 sm:top-2 sm:left-2 w-14 h-14 sm:w-16 sm:h-16 border-4 border-transparent border-b-pink-400 border-l-yellow-400 rounded-full animate-spin animate-reverse"></div>
         </div>
       </div>
     );
@@ -167,10 +167,10 @@ export default function DashboardPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center p-4">
         <div className="relative">
-          <div className="w-20 h-20 border-4 border-transparent border-t-cyan-400 border-r-purple-500 rounded-full animate-spin"></div>
-          <div className="absolute top-2 left-2 w-16 h-16 border-4 border-transparent border-b-pink-400 border-l-yellow-400 rounded-full animate-spin animate-reverse"></div>
+          <div className="w-16 h-16 sm:w-20 sm:h-20 border-4 border-transparent border-t-cyan-400 border-r-purple-500 rounded-full animate-spin"></div>
+          <div className="absolute top-1 left-1 sm:top-2 sm:left-2 w-14 h-14 sm:w-16 sm:h-16 border-4 border-transparent border-b-pink-400 border-l-yellow-400 rounded-full animate-spin animate-reverse"></div>
         </div>
       </div>
     );
@@ -178,31 +178,32 @@ export default function DashboardPage() {
 
   return (
     <div ref={containerRef} className="min-h-screen bg-black text-white overflow-hidden relative">
+      {/* Background decorative elements - optimized for mobile */}
       <div className="absolute inset-0 overflow-hidden">
         <div
-ref={(el) => {
-  floatingRefs.current[0] = el;
-}}
-          className="absolute top-10 left-10 w-72 h-72 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-full blur-3xl"
+          ref={(el) => {
+            floatingRefs.current[0] = el;
+          }}
+          className="absolute top-5 left-5 sm:top-10 sm:left-10 w-48 h-48 sm:w-72 sm:h-72 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-full blur-3xl"
         />
         <div
-ref={(el) => {
-  floatingRefs.current[0] = el;
-}}
-          className="absolute top-1/3 right-20 w-96 h-96 bg-gradient-to-r from-cyan-600/20 to-blue-600/20 rounded-full blur-3xl"
+          ref={(el) => {
+            floatingRefs.current[1] = el;
+          }}
+          className="absolute top-1/3 right-10 sm:right-20 w-64 h-64 sm:w-96 sm:h-96 bg-gradient-to-r from-cyan-600/20 to-blue-600/20 rounded-full blur-3xl"
         />
         <div
-ref={(el) => {
-  floatingRefs.current[0] = el;
-}}
-          className="absolute bottom-20 left-1/4 w-64 h-64 bg-gradient-to-r from-yellow-600/20 to-orange-600/20 rounded-full blur-3xl"
+          ref={(el) => {
+            floatingRefs.current[2] = el;
+          }}
+          className="absolute bottom-10 sm:bottom-20 left-1/4 w-48 h-48 sm:w-64 sm:h-64 bg-gradient-to-r from-yellow-600/20 to-orange-600/20 rounded-full blur-3xl"
         />
-        {[...Array(15)].map((_, i) => (
+        {[...Array(10)].map((_, i) => (
           <div
             key={i}
-ref={(el) => {
-  floatingRefs.current[0] = el;
-}}
+            ref={(el) => {
+              floatingRefs.current[i + 3] = el;
+            }}
             className="absolute w-1 h-1 bg-white/20 rounded-full"
             style={{
               top: `${Math.random() * 100}%`,
@@ -212,101 +213,104 @@ ref={(el) => {
         ))}
       </div>
 
-      <nav className="relative z-50 flex items-center justify-between p-6 backdrop-blur-sm bg-gray-900/20 border-b border-gray-800/50">
-        <Link href="/" className="nav-link flex items-center gap-2 hover:text-purple-400">
-          <span>←</span>
-          <span>back home</span>
+      {/* Navigation - Enhanced mobile responsiveness */}
+      <nav className="relative z-50 flex items-center justify-between p-3 sm:p-6 backdrop-blur-sm bg-gray-900/20 border-b border-gray-800/50">
+        <Link href="/" className="nav-link flex items-center gap-2 hover:text-purple-400 min-h-[44px] min-w-[44px]">
+          <span className="text-lg sm:text-base">←</span>
+          <span className="text-sm sm:text-base">back home</span>
         </Link>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <div className="relative">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-cyan-500 to-purple-500 animate-pulse" />
-            <div className="absolute inset-0 w-8 h-8 rounded-full bg-gradient-to-r from-cyan-500 to-purple-500 blur-md opacity-50" />
+            <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gradient-to-r from-cyan-500 to-purple-500 animate-pulse" />
+            <div className="absolute inset-0 w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gradient-to-r from-cyan-500 to-purple-500 blur-md opacity-50" />
           </div>
-          <span className="text-lg font-black bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+          <span className="text-base sm:text-lg font-black bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
             delulu dashboard
           </span>
         </div>
-        
       </nav>
 
-      <div className="relative z-10 container mx-auto max-w-6xl px-6 py-12">
-        <div ref={headerRef} className="text-center mb-16">
-          <h1 className="text-5xl md:text-7xl font-black mb-4">
+      <div className="relative z-10 container mx-auto max-w-6xl px-3 sm:px-6 py-6 sm:py-12">
+        {/* Header - Mobile-optimized typography */}
+        <div ref={headerRef} className="text-center mb-8 sm:mb-16">
+          <h1 className="text-3xl sm:text-5xl md:text-7xl font-black mb-2 sm:mb-4 leading-tight">
             <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent glitch-effect">
               your
             </span>
-            <span className="text-white mx-3">delulu</span>
+            <span className="text-white mx-2 sm:mx-3">delulu</span>
             <span className="bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400 bg-clip-text text-transparent glitch-effect">
               stats
             </span>
           </h1>
-          <p className="text-xl text-gray-400 font-medium">
+          <p className="text-base sm:text-xl text-gray-400 font-medium px-4 sm:px-0">
             have a look at past scenarios you analyzed along with the results
           </p>
         </div>
 
-        <div ref={statsRef} className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        {/* Stats Grid - Enhanced responsive layout */}
+        <div ref={statsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-12">
           <div className="feature-card group">
             <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl blur opacity-20 group-hover:opacity-40 transition-opacity duration-300" />
-            <div className="relative bg-gray-900/90 backdrop-blur-sm border border-gray-800 rounded-2xl p-8 text-center">
-              <div className="text-4xl font-black text-white mb-2">{responses.length}</div>
-              <p className="text-gray-400 font-bold text-sm">total scenarios analyzed</p>
-              <div className="text-2xl mt-2">🎭</div>
+            <div className="relative bg-gray-900/90 backdrop-blur-sm border border-gray-800 rounded-2xl p-6 sm:p-8 text-center min-h-[140px] flex flex-col justify-center">
+              <div className="text-3xl sm:text-4xl font-black text-white mb-2">{responses.length}</div>
+              <p className="text-gray-400 font-bold text-xs sm:text-sm">total scenarios analyzed</p>
+              <div className="text-xl sm:text-2xl mt-2">🎭</div>
             </div>
           </div>
           
           <div className="feature-card group">
             <div className="absolute -inset-0.5 bg-gradient-to-r from-red-600 to-orange-600 rounded-2xl blur opacity-20 group-hover:opacity-40 transition-opacity duration-300" />
-            <div className="relative bg-gray-900/90 backdrop-blur-sm border border-gray-800 rounded-2xl p-8 text-center">
-              <div className="text-4xl font-black text-red-400 mb-2">{redFlags}</div>
-              <p className="text-gray-400 font-bold text-sm">delulu moments</p>
-              <div className="text-2xl mt-2">🚨</div>
+            <div className="relative bg-gray-900/90 backdrop-blur-sm border border-gray-800 rounded-2xl p-6 sm:p-8 text-center min-h-[140px] flex flex-col justify-center">
+              <div className="text-3xl sm:text-4xl font-black text-red-400 mb-2">{redFlags}</div>
+              <p className="text-gray-400 font-bold text-xs sm:text-sm">delulu moments</p>
+              <div className="text-xl sm:text-2xl mt-2">🚨</div>
             </div>
           </div>
           
           <div className="feature-card group">
             <div className="absolute -inset-0.5 bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl blur opacity-20 group-hover:opacity-40 transition-opacity duration-300" />
-            <div className="relative bg-gray-900/90 backdrop-blur-sm border border-gray-800 rounded-2xl p-8 text-center">
-              <div className="text-4xl font-black text-green-400 mb-2">{greenFlags}</div>
-              <p className="text-gray-400 font-bold text-sm">valid rizz</p>
-              <div className="text-2xl mt-2">✅</div>
+            <div className="relative bg-gray-900/90 backdrop-blur-sm border border-gray-800 rounded-2xl p-6 sm:p-8 text-center min-h-[140px] flex flex-col justify-center">
+              <div className="text-3xl sm:text-4xl font-black text-green-400 mb-2">{greenFlags}</div>
+              <p className="text-gray-400 font-bold text-xs sm:text-sm">valid rizz</p>
+              <div className="text-xl sm:text-2xl mt-2">✅</div>
             </div>
           </div>
 
           <div className="feature-card group">
             <div className="absolute -inset-0.5 bg-gradient-to-r from-yellow-600 to-orange-600 rounded-2xl blur opacity-20 group-hover:opacity-40 transition-opacity duration-300" />
-            <div className="relative bg-gray-900/90 backdrop-blur-sm border border-gray-800 rounded-2xl p-8 text-center">
-              <div className={`text-4xl font-black mb-2 ${avgDeluluRating ? getDeluluLevel(avgDeluluRating).color : 'text-gray-400'}`}>
+            <div className="relative bg-gray-900/90 backdrop-blur-sm border border-gray-800 rounded-2xl p-6 sm:p-8 text-center min-h-[140px] flex flex-col justify-center">
+              <div className={`text-3xl sm:text-4xl font-black mb-2 ${avgDeluluRating ? getDeluluLevel(avgDeluluRating).color : 'text-gray-400'}`}>
                 {avgDeluluRating ? Math.round(avgDeluluRating) : 0}/10
               </div>
-              <p className="text-gray-400 font-bold text-sm">avg delulu rating</p>
-              <div className="text-2xl mt-2">{avgDeluluRating ? getDeluluLevel(avgDeluluRating).emoji : '🤷‍♀️'}</div>
+              <p className="text-gray-400 font-bold text-xs sm:text-sm">avg delulu rating</p>
+              <div className="text-xl sm:text-2xl mt-2">{avgDeluluRating ? getDeluluLevel(avgDeluluRating).emoji : '🤷‍♀️'}</div>
             </div>
           </div>
         </div>
 
+        {/* Milestones Section - Enhanced mobile layout */}
         {responses.length > 0 && (
-          <div ref={milestonesRef} className="feature-card group mb-12">
+          <div ref={milestonesRef} className="feature-card group mb-8 sm:mb-12">
             <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl blur opacity-10 group-hover:opacity-30 transition-opacity duration-300" />
-            <div className="relative bg-gray-900/90 backdrop-blur-sm border border-gray-800 rounded-2xl p-12">
-              <div className="text-center mb-8">
-                <div className="text-6xl mb-4">🏆</div>
-                <h3 className="text-3xl font-black text-white mb-2">milestone unlocked</h3>
-                <p className="text-gray-400 font-medium">your delulu journey achievements</p>
+            <div className="relative bg-gray-900/90 backdrop-blur-sm border border-gray-800 rounded-2xl p-6 sm:p-12">
+              <div className="text-center mb-6 sm:mb-8">
+                <div className="text-4xl sm:text-6xl mb-3 sm:mb-4">🏆</div>
+                <h3 className="text-2xl sm:text-3xl font-black text-white mb-2">milestone unlocked</h3>
+                <p className="text-gray-400 font-medium text-sm sm:text-base">your delulu journey achievements</p>
               </div>
 
               {achievedMilestones.length > 0 && (
                 <>
-                  <div className="bg-gradient-to-br from-purple-600/20 to-pink-600/20 border border-purple-500/30 rounded-2xl p-8 mb-8 text-center">
-                    <div className="text-5xl mb-4">{achievedMilestones[0].emoji}</div>
-                    <h4 className="text-2xl font-black text-white mb-2">{achievedMilestones[0].name}</h4>
-                    <p className="text-gray-400 font-medium mb-4">{achievedMilestones[0].description}</p>
-                    <div className="bg-purple-500/20 rounded-xl px-6 py-3 inline-block">
-                      <span className="text-purple-300 font-bold">{responses.length} scenarios analyzed</span>
+                  <div className="bg-gradient-to-br from-purple-600/20 to-pink-600/20 border border-purple-500/30 rounded-2xl p-6 sm:p-8 mb-6 sm:mb-8 text-center">
+                    <div className="text-3xl sm:text-5xl mb-3 sm:mb-4">{achievedMilestones[0].emoji}</div>
+                    <h4 className="text-xl sm:text-2xl font-black text-white mb-2">{achievedMilestones[0].name}</h4>
+                    <p className="text-gray-400 font-medium mb-3 sm:mb-4 text-sm sm:text-base px-2">{achievedMilestones[0].description}</p>
+                    <div className="bg-purple-500/20 rounded-xl px-4 sm:px-6 py-2 sm:py-3 inline-block">
+                      <span className="text-purple-300 font-bold text-sm sm:text-base">{responses.length} scenarios analyzed</span>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
                     {achievedMilestones.map((milestone, index) => (
                       <div key={milestone.threshold} className="feature-card group">
                         <ShareableBadge
@@ -322,40 +326,40 @@ ref={(el) => {
                   </div>
                 </>
               )}
-
             </div>
           </div>
         )}
 
-        <div ref={historyRef} className="space-y-8">
+        {/* History Section - Mobile-optimized */}
+        <div ref={historyRef} className="space-y-6 sm:space-y-8">
           <div className="text-center">
-            <h2 className="text-4xl font-black text-white mb-2">
+            <h2 className="text-2xl sm:text-4xl font-black text-white mb-2">
               <span className="bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
                 delulu history
               </span>
             </h2>
-            <p className="text-gray-400 font-medium">all the scenarios you analyzed</p>
+            <p className="text-gray-400 font-medium text-sm sm:text-base">all the scenarios you analyzed</p>
           </div>
           
           {responses.length === 0 ? (
             <div className="feature-card group max-w-2xl mx-auto">
               <div className="absolute -inset-0.5 bg-gradient-to-r from-gray-600 to-gray-500 rounded-2xl blur opacity-20 group-hover:opacity-40 transition-opacity duration-300" />
-              <div className="relative bg-gray-900/90 backdrop-blur-sm border border-gray-800 rounded-2xl p-16 text-center">
-                <div className="text-8xl mb-6">🤷‍♀️</div>
-                <h3 className="text-2xl font-black text-white mb-4">no delulu moments yet bestie</h3>
-                <p className="text-gray-400 font-medium mb-8 leading-relaxed">
+              <div className="relative bg-gray-900/90 backdrop-blur-sm border border-gray-800 rounded-2xl p-8 sm:p-16 text-center">
+                <div className="text-6xl sm:text-8xl mb-4 sm:mb-6">🤷‍♀️</div>
+                <h3 className="text-xl sm:text-2xl font-black text-white mb-3 sm:mb-4">no delulu moments yet bestie</h3>
+                <p className="text-gray-400 font-medium mb-6 sm:mb-8 leading-relaxed text-sm sm:text-base px-2">
                   start analyzing your crush scenarios or play the swipe game
-                  <br />
+                  <br className="hidden sm:block" />
                   to see your chaotic takes here
                 </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <div className="flex flex-col gap-3 sm:gap-4 justify-center">
                   <Link href="/analyze">
-                    <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white font-black py-4 px-8 rounded-xl hover:scale-105 transition-all duration-200 text-center">
+                    <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white font-black py-3 sm:py-4 px-6 sm:px-8 rounded-xl hover:scale-105 transition-all duration-200 text-center text-sm sm:text-base min-h-[44px] flex items-center justify-center">
                       analyze scenarios 🎭
                     </div>
                   </Link>
                   <Link href="/red-or-green">
-                    <div className="bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-black py-4 px-8 rounded-xl hover:scale-105 transition-all duration-200 text-center">
+                    <div className="bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-black py-3 sm:py-4 px-6 sm:px-8 rounded-xl hover:scale-105 transition-all duration-200 text-center text-sm sm:text-base min-h-[44px] flex items-center justify-center">
                       play swipe game 🎮
                     </div>
                   </Link>
@@ -363,15 +367,15 @@ ref={(el) => {
               </div>
             </div>
           ) : (
-            <div className="grid gap-6">
+            <div className="grid gap-4 sm:gap-6">
               {responses.map((response, index) => (
                 <div key={index} className="feature-card group">
                   <div className="absolute -inset-0.5 bg-gradient-to-r from-gray-600 to-gray-500 rounded-2xl blur opacity-10 group-hover:opacity-30 transition-opacity duration-300" />
-                  <div className="relative bg-gray-900/90 backdrop-blur-sm border border-gray-800 rounded-2xl p-8">
-                    <div className="flex justify-between items-start mb-6">
+                  <div className="relative bg-gray-900/90 backdrop-blur-sm border border-gray-800 rounded-2xl p-4 sm:p-8">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 sm:mb-6 gap-3 sm:gap-0">
                       <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <div className={`text-xl font-black ${
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
+                          <div className={`text-lg sm:text-xl font-black ${
                             response.classification.includes('Red Flag') || response.classification.includes('delulu risk') 
                               ? 'text-red-400' 
                               : response.classification.includes('Green Flag') || response.classification.includes('valid rizz')
@@ -381,37 +385,37 @@ ref={(el) => {
                             {response.classification}
                           </div>
                           {response.gameData?.deluluRating && (
-                            <div className={`px-3 py-1 rounded-full text-sm font-bold ${getDeluluLevel(response.gameData.deluluRating).color} bg-gray-800/50 border border-gray-700`}>
+                            <div className={`px-3 py-1 rounded-full text-xs sm:text-sm font-bold ${getDeluluLevel(response.gameData.deluluRating).color} bg-gray-800/50 border border-gray-700 inline-block`}>
                               {response.gameData.deluluRating}/10 delulu
                             </div>
                           )}
                         </div>
-                        <p className="text-gray-400 text-sm font-medium">
+                        <p className="text-gray-400 text-xs sm:text-sm font-medium">
                           {formatDate(response.timestamp)}
                         </p>
                       </div>
                     </div>
                     
-                    <div className="bg-gray-800/40 border border-gray-700 rounded-xl p-6 mb-6">
-                      <p className="text-gray-300 text-sm font-bold mb-2">scenario:</p>
-                      <p className="text-white leading-relaxed">
-                        {response.scenario.length > 200 
-                          ? `${response.scenario.substring(0, 200)}...` 
+                    <div className="bg-gray-800/40 border border-gray-700 rounded-xl p-4 sm:p-6 mb-4 sm:mb-6">
+                      <p className="text-gray-300 text-xs sm:text-sm font-bold mb-2">scenario:</p>
+                      <p className="text-white leading-relaxed text-sm sm:text-base">
+                        {response.scenario.length > 150 
+                          ? `${response.scenario.substring(0, 150)}...` 
                           : response.scenario}
                       </p>
                     </div>
                     
-                    <div className="bg-gray-800/40 border border-gray-700 rounded-xl p-6 mb-6">
-                      <p className="text-gray-300 text-sm font-bold mb-2">ai roast:</p>
-                      <p className="text-white leading-relaxed">{response.message}</p>
+                    <div className="bg-gray-800/40 border border-gray-700 rounded-xl p-4 sm:p-6 mb-4 sm:mb-6">
+                      <p className="text-gray-300 text-xs sm:text-sm font-bold mb-2">ai roast:</p>
+                      <p className="text-white leading-relaxed text-sm sm:text-base">{response.message}</p>
                     </div>
                     
-                    <div className="flex flex-wrap gap-3">
-                      {response.emotions.slice(0, 4).map((emotion, emotionIndex) => (
-                        <div key={emotionIndex} className="flex items-center gap-2 bg-gray-800/40 border border-gray-700 rounded-full px-4 py-2">
-                          <span className="text-lg">{getEmotionEmoji(emotion.label)}</span>
-                          <span className="text-white text-sm font-bold capitalize">{emotion.label}</span>
-                          <span className="text-gray-400 text-sm font-bold">
+                    <div className="flex flex-wrap gap-2 sm:gap-3">
+                      {response.emotions.slice(0, 3).map((emotion, emotionIndex) => (
+                        <div key={emotionIndex} className="flex items-center gap-1 sm:gap-2 bg-gray-800/40 border border-gray-700 rounded-full px-3 sm:px-4 py-1 sm:py-2">
+                          <span className="text-base sm:text-lg">{getEmotionEmoji(emotion.label)}</span>
+                          <span className="text-white text-xs sm:text-sm font-bold capitalize">{emotion.label}</span>
+                          <span className="text-gray-400 text-xs sm:text-sm font-bold">
                             {Math.round(emotion.score * 100)}%
                           </span>
                         </div>
@@ -424,28 +428,29 @@ ref={(el) => {
           )}
         </div>
 
+        {/* Call to action - Mobile optimized */}
         {responses.length > 0 && responses.length < 10 && (
-          <div className="text-center mt-16">
+          <div className="text-center mt-8 sm:mt-16">
             <div className="feature-card group max-w-2xl mx-auto">
               <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl blur opacity-20 group-hover:opacity-40 transition-opacity duration-300" />
-              <div className="relative bg-gray-900/90 backdrop-blur-sm border border-gray-800 rounded-2xl p-12 text-center">
-                <div className="text-6xl mb-6">🎯</div>
-                <h3 className="text-2xl font-black text-white mb-4">
+              <div className="relative bg-gray-900/90 backdrop-blur-sm border border-gray-800 rounded-2xl p-8 sm:p-12 text-center">
+                <div className="text-4xl sm:text-6xl mb-4 sm:mb-6">🎯</div>
+                <h3 className="text-xl sm:text-2xl font-black text-white mb-3 sm:mb-4">
                   keep the delulu energy going!
                 </h3>
-                <p className="text-gray-400 font-medium mb-8 leading-relaxed">
+                <p className="text-gray-400 font-medium mb-6 sm:mb-8 leading-relaxed text-sm sm:text-base px-2">
                   analyze {Math.min(10 - responses.length, 5)} more scenario{Math.min(10 - responses.length, 5) > 1 ? 's' : ''} to unlock more achievements
-                  <br />
+                  <br className="hidden sm:block" />
                   and see how delusional you really are fr 💀
                 </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <div className="flex flex-col gap-3 sm:gap-4 justify-center">
                   <Link href="/analyze">
-                    <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white font-black py-4 px-8 rounded-xl hover:scale-105 transition-all duration-200 text-center">
+                    <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white font-black py-3 sm:py-4 px-6 sm:px-8 rounded-xl hover:scale-105 transition-all duration-200 text-center text-sm sm:text-base min-h-[44px] flex items-center justify-center">
                       analyze more scenarios 🎭
                     </div>
                   </Link>
                   <Link href="/red-or-green">
-                    <div className="bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-black py-4 px-8 rounded-xl hover:scale-105 transition-all duration-200 text-center">
+                    <div className="bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-black py-3 sm:py-4 px-6 sm:px-8 rounded-xl hover:scale-105 transition-all duration-200 text-center text-sm sm:text-base min-h-[44px] flex items-center justify-center">
                       play swipe game 🎮
                     </div>
                   </Link>
@@ -524,6 +529,12 @@ ref={(el) => {
 
         .animate-reverse {
           animation-direction: reverse;
+        }
+
+        @media (max-width: 640px) {
+          .feature-card:hover {
+            transform: none;
+          }
         }
       `}</style>
     </div>

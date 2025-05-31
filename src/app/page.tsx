@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { useState, useEffect, useRef,ReactNode } from 'react';
+import { useState, useEffect, useRef, ReactNode } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { User } from '@supabase/supabase-js';
 import Link from 'next/link';
@@ -12,8 +12,8 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = React.useState(false);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   
   // GSAP refs
@@ -82,14 +82,15 @@ export default function HomePage() {
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    setIsMobileMenuOpen(false);
   };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="relative">
-          <div className="w-20 h-20 border-4 border-transparent border-t-cyan-400 border-r-purple-500 rounded-full animate-spin"></div>
-          <div className="absolute top-2 left-2 w-16 h-16 border-4 border-transparent border-b-pink-400 border-l-yellow-400 rounded-full animate-spin animate-reverse"></div>
+          <div className="w-16 h-16 sm:w-20 sm:h-20 border-4 border-transparent border-t-cyan-400 border-r-purple-500 rounded-full animate-spin"></div>
+          <div className="absolute top-1 left-1 sm:top-2 sm:left-2 w-14 h-14 sm:w-16 sm:h-16 border-4 border-transparent border-b-pink-400 border-l-yellow-400 rounded-full animate-spin animate-reverse"></div>
         </div>
       </div>
     );
@@ -98,168 +99,220 @@ export default function HomePage() {
   return (
     <div ref={containerRef} className="min-h-screen bg-black text-white overflow-hidden relative">
       {/* Animated Background Elements */}
-    <div className="absolute inset-0 overflow-hidden">
-  <div
-    ref={(el) => {
-      floatingRefs.current[0] = el;
-    }}
-    className="absolute top-10 left-10 w-72 h-72 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-full blur-3xl"
-  />
-  <div
-    ref={(el) => {
-      floatingRefs.current[1] = el;
-    }}
-    className="absolute top-1/3 right-20 w-96 h-96 bg-gradient-to-r from-cyan-600/20 to-blue-600/20 rounded-full blur-3xl"
-  />
-  <div
-    ref={(el) => {
-      floatingRefs.current[2] = el;
-    }}
-    className="absolute bottom-20 left-1/4 w-64 h-64 bg-gradient-to-r from-yellow-600/20 to-orange-600/20 rounded-full blur-3xl"
-  />
-  {[...Array(20)].map((_, i) => (
-    <div
-      key={i}
-      ref={(el) => {
-        floatingRefs.current[i + 3] = el;
-      }}
-      className="absolute w-1 h-1 bg-white/30 rounded-full"
-      style={{
-        top: `${Math.random() * 100}%`,
-        left: `${Math.random() * 100}%`,
-      }}
-    />
-  ))}
-</div>
-
+      <div className="absolute inset-0 overflow-hidden">
+        <div
+          ref={(el) => {
+            floatingRefs.current[0] = el;
+          }}
+          className="absolute top-5 left-5 sm:top-10 sm:left-10 w-48 h-48 sm:w-72 sm:h-72 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-full blur-2xl sm:blur-3xl"
+        />
+        <div
+          ref={(el) => {
+            floatingRefs.current[1] = el;
+          }}
+          className="absolute top-1/4 right-5 sm:top-1/3 sm:right-20 w-64 h-64 sm:w-96 sm:h-96 bg-gradient-to-r from-cyan-600/20 to-blue-600/20 rounded-full blur-2xl sm:blur-3xl"
+        />
+        <div
+          ref={(el) => {
+            floatingRefs.current[2] = el;
+          }}
+          className="absolute bottom-10 left-1/4 w-48 h-48 sm:bottom-20 sm:w-64 sm:h-64 bg-gradient-to-r from-yellow-600/20 to-orange-600/20 rounded-full blur-2xl sm:blur-3xl"
+        />
+        {[...Array(15)].map((_, i) => (
+          <div
+            key={i}
+            ref={(el) => {
+              floatingRefs.current[i + 3] = el;
+            }}
+            className="absolute w-1 h-1 bg-white/30 rounded-full hidden sm:block"
+            style={{
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+            }}
+          />
+        ))}
+      </div>
 
       {/* Navigation */}
-      <nav className="relative z-50 flex items-center justify-between p-6 backdrop-blur-sm bg-gray-900/20 border-b border-gray-800/50">
-        <div className="flex items-center gap-3">
+      <nav className="relative z-50 flex items-center justify-between p-4 sm:p-6 backdrop-blur-sm bg-gray-900/20 border-b border-gray-800/50">
+        <div className="flex items-center gap-2 sm:gap-3">
           <div className="relative">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 animate-pulse" />
-            <div className="absolute inset-0 w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 blur-md opacity-50" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 animate-pulse" />
+            <div className="absolute inset-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 blur-md opacity-50" />
           </div>
-          <span className="text-2xl font-black bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-             Rizz or Risk
+          <span className="text-lg sm:text-2xl font-black bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+            Rizz or Risk
           </span>
         </div>
-        <div className="flex items-center gap-4">
+
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex items-center gap-4">
           <button
             onClick={() => setShowAuthModal(true)}
-            className="group relative overflow-hidden rounded-xl font-bold transition-all duration-300 hover:scale-105 mt-1 -ml-2"
+            className="group relative overflow-hidden rounded-xl font-bold transition-all duration-300 hover:scale-105"
           >
-            <span className="relative z-10">{user ? '' : '🔑 Sign In'}</span>
+            <span className="relative z-10 px-4 py-2">{user ? '' : '🔑 Sign In'}</span>
             <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           </button>
           {user && (
             <div className="flex space-x-4">
-              <Link href="/analyze" className="nav-link mt-3">
+              <Link href="/analyze" className="nav-link">
                 📝 analyze
               </Link>
-              <Link href="/red-or-green" className="nav-link mt-3">
+              <Link href="/red-or-green" className="nav-link">
                 🎮 swipe
               </Link>
-              <Link href="/dashboard" className="nav-link mt-3">
+              <Link href="/dashboard" className="nav-link">
                 📊 dashboard
               </Link>
               <button
                 onClick={signOut}
-                className="nav-link hover:text-red-400 mt-1 "
+                className="nav-link hover:text-red-400 -mt-2"
               >
                 Sign Out
               </button>
             </div>
           )}
         </div>
+
+        {/* Mobile Menu Button */}
+        <div className="md:hidden">
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="p-2 rounded-lg bg-gray-800/50 text-white"
+          >
+            <div className="w-6 h-6 flex flex-col justify-center items-center">
+              <span className={`block h-0.5 w-6 bg-white transition-transform duration-300 ${isMobileMenuOpen ? 'rotate-45 translate-y-1' : '-translate-y-1'}`} />
+              <span className={`block h-0.5 w-6 bg-white transition-opacity duration-300 ${isMobileMenuOpen ? 'opacity-0' : 'opacity-100'}`} />
+              <span className={`block h-0.5 w-6 bg-white transition-transform duration-300 ${isMobileMenuOpen ? '-rotate-45 -translate-y-1' : 'translate-y-1'}`} />
+            </div>
+          </button>
+        </div>
+
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="absolute top-full left-0 right-0 bg-gray-900/95 backdrop-blur-sm border-b border-gray-800/50 md:hidden">
+            <div className="flex flex-col p-4 space-y-4">
+              {!user ? (
+                <button
+                  onClick={() => {
+                    setShowAuthModal(true);
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="text-left px-4 py-2 rounded-lg bg-gradient-to-r from-pink-600 to-purple-600 font-bold"
+                >
+                  🔑 Sign In
+                </button>
+              ) : (
+                <>
+                  <Link href="/analyze" className="mobile-nav-link" onClick={() => setIsMobileMenuOpen(false)}>
+                    📝 analyze
+                  </Link>
+                  <Link href="/red-or-green" className="mobile-nav-link" onClick={() => setIsMobileMenuOpen(false)}>
+                    🎮 swipe
+                  </Link>
+                  <Link href="/dashboard" className="mobile-nav-link" onClick={() => setIsMobileMenuOpen(false)}>
+                    📊 dashboard
+                  </Link>
+                  <button
+                    onClick={signOut}
+                    className="text-left px-4 py-2 rounded-lg hover:bg-gray-800/50 text-red-400"
+                  >
+                    Sign Out
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* Main Content */}
-      <div ref={heroRef} className="relative z-10 flex flex-col items-center justify-center min-h-screen px-6 py-20">
+      <div ref={heroRef} className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 py-10 sm:py-20">
         {/* Hero Section */}
-        <div ref={titleRef} className="text-center mb-8">
-          <h1 className="text-6xl md:text-8xl lg:text-9xl font-black mb-6">
+        <div ref={titleRef} className="text-center mb-6 sm:mb-8">
+          <h1 className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-black mb-4 sm:mb-6 leading-tight">
             <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent glitch-effect">
               Rizz
             </span>
-            <span className="text-white mx-4">or</span>
+            <span className="text-white mx-2 sm:mx-4">or</span>
             <span className="bg-gradient-to-r from-red-400 via-orange-400 to-yellow-400 bg-clip-text text-transparent glitch-effect">
               Risk?
             </span>
           </h1>
-          <div className="text-4xl md:text-6xl animate-bounce">💕</div>
+          <div className="text-3xl sm:text-4xl md:text-6xl animate-bounce">💕</div>
         </div>
 
-        <div ref={subtitleRef} className="text-center mb-12 max-w-3xl">
-          <p className="text-xl md:text-2xl text-gray-300 leading-relaxed font-medium">
+        <div ref={subtitleRef} className="text-center mb-8 sm:mb-12 max-w-3xl px-4">
+          <p className="text-lg sm:text-xl md:text-2xl text-gray-300 leading-relaxed font-medium">
             AI-powered vibe check for your situationship! 🤔
-            <br className="hidden md:block" />
+            <br className="hidden sm:block" />
             <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent font-bold">
               Are you smooth with the rizz or just deep in delulu?
             </span>
           </p>
-          <p className="text-lg text-gray-400 mt-4">
+          <p className="text-base sm:text-lg text-gray-400 mt-3 sm:mt-4">
             Swipe on red & green flags and let AI drop the truth! 🚩✅
           </p>
         </div>
 
         {!user ? (
           /* Sign In Section */
-          <div ref={buttonsRef} className="flex flex-col sm:flex-row gap-6 mb-16">
+          <div ref={buttonsRef} className="flex flex-col items-center gap-4 sm:gap-6 mb-12 sm:mb-16 w-full max-w-md">
             <button
               onClick={() => setShowAuthModal(true)}
-              className="group relative overflow-hidden rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 px-8 py-4 text-lg font-bold transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/25"
+              className="group relative overflow-hidden rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-bold transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/25 w-full sm:w-auto"
             >
-              <span className="relative z-10 flex items-center gap-2">
+              <span className="relative z-10 flex items-center justify-center gap-2">
                 Start Vibe Check ✨
                 <span className="transition-transform group-hover:translate-x-1">→</span>
               </span>
               <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </button>
-            <p className="text-gray-400 text-center mt-4">
+            <p className="text-gray-400 text-center text-sm sm:text-base px-4">
               sign in to collect badges and flex your delulu stats 📊
             </p>
           </div>
         ) : (
           /* User Dashboard */
-          <div ref={buttonsRef} className="space-y-8 mb-16">
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-black text-white mb-4">
+          <div ref={buttonsRef} className="space-y-6 sm:space-y-8 mb-12 sm:mb-16 w-full max-w-6xl">
+            <div className="text-center mb-6 sm:mb-8">
+              <h2 className="text-2xl sm:text-3xl font-black text-white mb-4">
                 what's the <span className="text-purple-400">vibe check</span> today?
               </h2>
             </div>
-            <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 px-4">
               <Link href="/analyze">
                 <div className="feature-card group">
-                  <div className="text-5xl mb-6 group-hover:scale-110 transition-transform duration-300">📱</div>
-                  <h3 className="text-2xl font-black text-white mb-4">analyze texts</h3>
-                  <p className="text-gray-400 mb-6">
+                  <div className="text-4xl sm:text-5xl mb-4 sm:mb-6 group-hover:scale-110 transition-transform duration-300">📱</div>
+                  <h3 className="text-xl sm:text-2xl font-black text-white mb-3 sm:mb-4">analyze texts</h3>
+                  <p className="text-gray-400 mb-4 sm:mb-6 text-sm sm:text-base">
                     drop that screenshot and let AI destroy your delusions fr 💀
                   </p>
-                  <div className="text-cyan-400 font-bold group-hover:text-white transition-colors">
+                  <div className="text-cyan-400 font-bold group-hover:text-white transition-colors text-sm sm:text-base">
                     expose me →
                   </div>
                 </div>
               </Link>
               <Link href="/red-or-green">
                 <div className="feature-card group">
-                  <div className="text-5xl mb-6 group-hover:scale-110 transition-transform duration-300">🎯</div>
-                  <h3 className="text-2xl font-black text-white mb-4">swipe challenge</h3>
-                  <p className="text-gray-400 mb-6">
+                  <div className="text-4xl sm:text-5xl mb-4 sm:mb-6 group-hover:scale-110 transition-transform duration-300">🎯</div>
+                  <h3 className="text-xl sm:text-2xl font-black text-white mb-3 sm:mb-4">swipe challenge</h3>
+                  <p className="text-gray-400 mb-4 sm:mb-6 text-sm sm:text-base">
                     test your dating choices and get rated by AI no cap 🧢
                   </p>
-                  <div className="text-purple-400 font-bold group-hover:text-white transition-colors">
+                  <div className="text-purple-400 font-bold group-hover:text-white transition-colors text-sm sm:text-base">
                     rate my choices →
                   </div>
                 </div>
               </Link>
             </div>
-            <div className="text-center">
-              <p className="text-gray-400 mb-6 text-lg">
+            <div className="text-center px-4">
+              <p className="text-gray-400 mb-4 sm:mb-6 text-base sm:text-lg">
                 ready to see your <span className="text-pink-400 font-bold">delulu journey</span>?
               </p>
               <Link href="/dashboard">
-                <div className="inline-block px-8 py-4 bg-gradient-to-r from-pink-600 to-purple-600 rounded-full font-black text-lg hover:scale-105 transition-transform duration-200 glow-effect">
+                <div className="inline-block px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-pink-600 to-purple-600 rounded-full font-black text-base sm:text-lg hover:scale-105 transition-transform duration-200 glow-effect">
                   📊 my delulu stats
                 </div>
               </Link>
@@ -268,30 +321,30 @@ export default function HomePage() {
         )}
 
         {/* Stats */}
-        <div ref={statsRef} className="grid grid-cols-3 gap-8 mb-20">
+        <div ref={statsRef} className="grid grid-cols-3 gap-4 sm:gap-8 mb-12 sm:mb-20 w-full max-w-2xl px-4">
           <div className="text-center">
-            <div className="text-3xl md:text-4xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+            <div className="text-2xl sm:text-3xl md:text-4xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
               10K+
             </div>
-            <div className="text-gray-400 text-sm md:text-base">Vibes Checked</div>
+            <div className="text-gray-400 text-xs sm:text-sm md:text-base">Vibes Checked</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl md:text-4xl font-black bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+            <div className="text-2xl sm:text-3xl md:text-4xl font-black bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
               95%
             </div>
-            <div className="text-gray-400 text-sm md:text-base">Accuracy Rate</div>
+            <div className="text-gray-400 text-xs sm:text-sm md:text-base">Accuracy Rate</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl md:text-4xl font-black bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+            <div className="text-2xl sm:text-3xl md:text-4xl font-black bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
               24/7
             </div>
-            <div className="text-gray-400 text-sm md:text-base">AI Support</div>
+            <div className="text-gray-400 text-xs sm:text-sm md:text-base">AI Support</div>
           </div>
         </div>
       </div>
 
       {/* Features */}
-      <div ref={featuresRef} className="relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 px-6 pb-20">
+      <div ref={featuresRef} className="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 px-4 sm:px-6 pb-12 sm:pb-20">
         <FeatureCard
           icon="⭐"
           title="Delulu Detector"
@@ -313,7 +366,7 @@ export default function HomePage() {
         <FeatureCard
           icon="✅"
           title="Track your previous delulu scenarios"
-          description="Learn from your past and maybe don’t do that again 💀"
+          description="Learn from your past and maybe don't do that again 💀"
           gradient="from-indigo-500 to-purple-500"
         />
         <FeatureCard
@@ -322,33 +375,32 @@ export default function HomePage() {
           description="Your business stays your business - encrypted & secure 🔒"
           gradient="from-yellow-500 to-orange-500"
         />
-      <FeatureCard
-        icon="🌐"
-        title="Let us know what you think of Rizz OR Risk"
-        description={
-          <>
-            Feedback, compliments, constructive roasts — all welcome. Drop them{' '}
-            <span
-              onClick={() => setIsModalOpen(true)}
-              className="underline cursor-pointer text-fuchsia-600"
-            >
-              here!
-            </span>
-          </>
-        }
-        gradient="from-lime-400 to-fuchsia-500"
-      />
+        <FeatureCard
+          icon="🌐"
+          title="Let us know what you think of Rizz OR Risk"
+          description={
+            <>
+              Feedback, compliments, constructive roasts — all welcome. Drop them{' '}
+              <span
+                onClick={() => setIsModalOpen(true)}
+                className="underline cursor-pointer text-fuchsia-600"
+              >
+                here!
+              </span>
+            </>
+          }
+          gradient="from-lime-400 to-fuchsia-500"
+        />
+      </div>
 
       <FeedbackFormModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
       />
 
-      </div>
-
       {/* Footer */}
-      <footer className="relative z-10 text-center py-12 border-t border-gray-800/50">
-        <p className="text-gray-500 font-mono text-sm">no cap, this AI knows your vibe fr 💯</p>
+      <footer className="relative z-10 text-center py-8 sm:py-12 border-t border-gray-800/50 px-4">
+        <p className="text-gray-500 font-mono text-xs sm:text-sm">no cap, this AI knows your vibe fr 💯</p>
         <p className="text-gray-600 text-xs mt-2">© 2025 rizzORrisk.ai - by Anusha Tomar</p>
       </footer>
 
@@ -422,11 +474,18 @@ export default function HomePage() {
         .feature-card {
           background: linear-gradient(135deg, rgba(17, 24, 39, 0.8) 0%, rgba(31, 41, 55, 0.6) 100%);
           backdrop-filter: blur(20px);
-          border-radius: 20px;
-          padding: 2rem;
+          border-radius: 16px;
+          padding: 1.5rem;
           border: 1px solid rgba(75, 85, 99, 0.2);
           transition: all 0.3s ease;
           cursor: pointer;
+        }
+
+        @media (min-width: 640px) {
+          .feature-card {
+            border-radius: 20px;
+            padding: 2rem;
+          }
         }
 
         .feature-card:hover {
@@ -450,8 +509,48 @@ export default function HomePage() {
           color: #a855f7;
         }
 
+        .mobile-nav-link {
+          color: white;
+          font-weight: 600;
+          text-decoration: none;
+          padding: 0.75rem 1rem;
+          border-radius: 8px;
+          transition: all 0.2s ease;
+          text-transform: lowercase;
+          display: block;
+        }
+
+        .mobile-nav-link:hover {
+          background: rgba(139, 92, 246, 0.2);
+          color: #a855f7;
+        }
+
         .animate-reverse {
           animation-direction: reverse;
+        }
+
+        /* Mobile-specific optimizations */
+        @media (max-width: 640px) {
+          .glitch-effect:hover {
+            animation: none; /* Disable glitch on mobile for performance */
+          }
+        }
+
+        /* Reduce motion for users who prefer it */
+        @media (prefers-reduced-motion: reduce) {
+          .feature-card:hover {
+            transform: none;
+          }
+          
+          .glitch-effect:hover {
+            animation: none;
+          }
+          
+          * {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+          }
         }
       `}</style>
     </div>
@@ -461,20 +560,20 @@ export default function HomePage() {
 interface FeatureCardProps {
   icon: string;
   title: string;
-
-description: ReactNode;  gradient: string;
+  description: ReactNode;
+  gradient: string;
 }
 
 const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, description, gradient }) => {
   return (
     <div className="group relative cursor-pointer">
-      <div className={`absolute -inset-0.5 bg-gradient-to-r ${gradient} rounded-2xl blur opacity-0 group-hover:opacity-75 transition-opacity duration-300`} />
-      <div className="relative h-full rounded-2xl bg-gray-900/90 backdrop-blur-sm border border-gray-800 p-6 transition-all duration-300 group-hover:scale-105 group-hover:-translate-y-2">
-        <div className={`inline-flex p-3 rounded-xl bg-gradient-to-r ${gradient} text-white mb-4 text-3xl`}>
+      <div className={`absolute -inset-0.5 bg-gradient-to-r ${gradient} rounded-xl sm:rounded-2xl blur opacity-0 group-hover:opacity-75 transition-opacity duration-300`} />
+      <div className="relative h-full rounded-xl sm:rounded-2xl bg-gray-900/90 backdrop-blur-sm border border-gray-800 p-4 sm:p-6 transition-all duration-300 group-hover:scale-105 group-hover:-translate-y-2">
+        <div className={`inline-flex p-2 sm:p-3 rounded-xl bg-gradient-to-r ${gradient} text-white mb-3 sm:mb-4 text-2xl sm:text-3xl`}>
           {icon}
         </div>
-        <h3 className="text-xl font-bold text-white mb-3">{title}</h3>
-        <p className="text-gray-400 leading-relaxed">{description}</p>
+        <h3 className="text-lg sm:text-xl font-bold text-white mb-2 sm:mb-3">{title}</h3>
+        <p className="text-gray-400 leading-relaxed text-sm sm:text-base">{description}</p>
       </div>
     </div>
   );

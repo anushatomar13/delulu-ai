@@ -202,6 +202,7 @@ const getAIJudgment = async (results: SwipeResult[]) => {
           ? JSON.parse(userData.responses) 
           : userData.responses;
       }
+
       // Create new response object
       const newResponse = {
         scenario: `Swipe Game: ${results.length} cards (${results.filter(r => r.choice === 'rizz').length} Rizz, ${results.filter(r => r.choice === 'risk').length} Risk)`,
@@ -257,8 +258,8 @@ const getAIJudgment = async (results: SwipeResult[]) => {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="relative">
-          <div className="w-20 h-20 border-4 border-transparent border-t-cyan-400 border-r-purple-500 rounded-full animate-spin"></div>
-          <div className="absolute top-2 left-2 w-16 h-16 border-4 border-transparent border-b-pink-400 border-l-yellow-400 rounded-full animate-spin animate-reverse"></div>
+          <div className="w-16 h-16 sm:w-20 sm:h-20 border-4 border-transparent border-t-cyan-400 border-r-purple-500 rounded-full animate-spin"></div>
+          <div className="absolute top-1 left-1 sm:top-2 sm:left-2 w-14 h-14 sm:w-16 sm:h-16 border-4 border-transparent border-b-pink-400 border-l-yellow-400 rounded-full animate-spin animate-reverse"></div>
         </div>
       </div>
     );
@@ -270,15 +271,15 @@ const getAIJudgment = async (results: SwipeResult[]) => {
      <div className="absolute inset-0 overflow-hidden">
   <div
     ref={(el) => { floatingRefs.current[0] = el; }}
-    className="absolute top-10 left-10 w-72 h-72 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-full blur-3xl"
+    className="absolute top-4 left-4 sm:top-10 sm:left-10 w-48 h-48 sm:w-72 sm:h-72 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-full blur-3xl"
   />
   <div
     ref={(el) => { floatingRefs.current[1] = el; }}
-    className="absolute top-1/3 right-20 w-96 h-96 bg-gradient-to-r from-cyan-600/20 to-blue-600/20 rounded-full blur-3xl"
+    className="absolute top-1/3 right-8 sm:right-20 w-64 h-64 sm:w-96 sm:h-96 bg-gradient-to-r from-cyan-600/20 to-blue-600/20 rounded-full blur-3xl"
   />
   <div
     ref={(el) => { floatingRefs.current[2] = el; }}
-    className="absolute bottom-20 left-1/4 w-64 h-64 bg-gradient-to-r from-yellow-600/20 to-orange-600/20 rounded-full blur-3xl"
+    className="absolute bottom-10 left-1/4 w-48 h-48 sm:w-64 sm:h-64 bg-gradient-to-r from-yellow-600/20 to-orange-600/20 rounded-full blur-3xl"
   />
   {[...Array(15)].map((_, i) => (
     <div
@@ -293,41 +294,42 @@ const getAIJudgment = async (results: SwipeResult[]) => {
   ))}
 </div>
 
-
       {/* Navigation */}
-      <nav className="relative z-50 flex items-center justify-between p-6 backdrop-blur-sm bg-gray-900/20 border-b border-gray-800/50">
-        <Link href="/" className="nav-link flex items-center gap-2 hover:text-purple-400">
+      <nav className="relative z-50 flex items-center justify-between p-3 sm:p-6 backdrop-blur-sm bg-gray-900/20 border-b border-gray-800/50">
+        <Link href="/" className="nav-link flex items-center gap-1 sm:gap-2 hover:text-purple-400 text-sm sm:text-base">
           <span>←</span>
-          <span>back home</span>
+          <span className="hidden xs:inline">back home</span>
+          <span className="xs:hidden">back</span>
         </Link>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <div className="relative">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 animate-pulse" />
-            <div className="absolute inset-0 w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 blur-md opacity-50" />
+            <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 animate-pulse" />
+            <div className="absolute inset-0 w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 blur-md opacity-50" />
           </div>
-          <span className="text-lg font-black bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+          <span className="text-base sm:text-lg font-black bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
             swipe zone
           </span>
         </div>
-        <Link href="/dashboard" className="nav-link flex items-center gap-2 hover:text-cyan-400">
-          <span>dashboard</span>
+        <Link href="/dashboard" className="nav-link flex items-center gap-1 sm:gap-2 hover:text-cyan-400 text-sm sm:text-base">
+          <span className="hidden xs:inline">dashboard</span>
+          <span className="xs:hidden">stats</span>
           <span>→</span>
         </Link>
       </nav>
 
-      <div className="relative z-10 container mx-auto max-w-4xl px-6 py-12">
+      <div className="relative z-10 container mx-auto max-w-4xl px-3 sm:px-6 py-6 sm:py-12">
         {/* Header */}
-        <div ref={headerRef} className="text-center mb-16">
-          <h1 className="text-5xl md:text-7xl font-black mb-4">
+        <div ref={headerRef} className="text-center mb-8 sm:mb-16">
+          <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-7xl font-black mb-2 sm:mb-4 leading-tight">
             <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent glitch-effect">
               swipe
             </span>
-            <span className="text-white mx-3">your</span>
+            <span className="text-white mx-2 sm:mx-3">your</span>
             <span className="bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400 bg-clip-text text-transparent glitch-effect">
               delulu
             </span>
           </h1>
-          <p className="text-xl text-gray-400 font-medium">
+          <p className="text-base sm:text-xl text-gray-400 font-medium px-4">
             time to expose how delusional you really are bestie 💀
           </p>
         </div>
@@ -336,62 +338,63 @@ const getAIJudgment = async (results: SwipeResult[]) => {
         {gameState === 'setup' && (
           <div ref={setupRef} className="feature-card group max-w-2xl mx-auto">
             <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl blur opacity-20 group-hover:opacity-40 transition-opacity duration-300" />
-            <div className="relative rounded-2xl bg-gray-900/90 backdrop-blur-sm border border-gray-800 p-12 text-center">
-              <div className="text-8xl mb-8">💕</div>
-              <h2 className="text-3xl font-black text-white mb-4">ready to get humbled?</h2>
-              <p className="text-gray-400 text-lg mb-12 leading-relaxed">
+            <div className="relative rounded-2xl bg-gray-900/90 backdrop-blur-sm border border-gray-800 p-6 sm:p-12 text-center">
+              <div className="text-4xl sm:text-8xl mb-4 sm:mb-8">💕</div>
+              <h2 className="text-xl sm:text-3xl font-black text-white mb-2 sm:mb-4">ready to get humbled?</h2>
+              <p className="text-gray-400 text-sm sm:text-lg mb-6 sm:mb-12 leading-relaxed px-2">
                 swipe through dating scenarios and we'll calculate your delulu level
                 <br />
                 <span className="text-green-400 font-bold">💚 = valid rizz</span> | <span className="text-red-400 font-bold">❤️ = delulu risk</span>
               </p>
               
-              <div className="mb-12">
-                <label className="block text-white font-black text-xl mb-6">
+              <div className="mb-6 sm:mb-12">
+                <label className="block text-white font-black text-lg sm:text-xl mb-4 sm:mb-6">
                   how many cards you tryna swipe?
                 </label>
                 <select 
                   value={cardCount} 
                   onChange={(e) => setCardCount(Number(e.target.value))}
-                  className="bg-gray-800/60 text-white border border-gray-700 rounded-xl px-6 py-4 text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="bg-gray-800/60 text-white border border-gray-700 rounded-xl px-4 py-3 sm:px-6 sm:py-4 text-center text-base sm:text-lg font-bold focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent w-full max-w-xs"
                 >
-                  <option value={3}>3 cards (baby steps)</option>
-                  <option value={5}>5 cards (standard delulu test)</option>
-                  <option value={7}>7 cards (extended reality check)</option>
-                  <option value={10}>10 cards (maximum chaos mode)</option>
+                  <option value={3}>3 cards</option>
+                  <option value={5}>5 cards</option>
+                  <option value={7}>7 cards</option>
+                  <option value={10}>10 cards</option>
                 </select>
               </div>
               
               <button
                 onClick={startGame}
-                className="group relative overflow-hidden rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 px-12 py-6 text-xl font-black transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/25"
+                className="group relative overflow-hidden rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 px-8 py-4 sm:px-12 sm:py-6 text-lg sm:text-xl font-black transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/25 w-full sm:w-auto"
               >
-                <span className="relative z-10 flex items-center justify-center gap-3">
+                <span className="relative z-10 flex items-center justify-center gap-2 sm:gap-3">
                   <span>let's get delusional</span>
-                  <span className="text-3xl">🚀</span>
+                  <span className="text-2xl sm:text-3xl">🚀</span>
                 </span>
                 <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </button>
             </div>
           </div>
         )}
+
         {/* Swiping Phase */}
         {gameState === 'swiping' && (
-          <div ref={swipingRef} className="space-y-8">
+          <div ref={swipingRef} className="space-y-4 sm:space-y-8">
             {/* Progress */}
             <div className="feature-card group">
               <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-600 to-purple-600 rounded-2xl blur opacity-10 group-hover:opacity-30 transition-opacity duration-300" />
-              <div className="relative bg-gray-900/90 backdrop-blur-sm border border-gray-800 rounded-2xl p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <span className="text-white font-black text-lg">
+              <div className="relative bg-gray-900/90 backdrop-blur-sm border border-gray-800 rounded-2xl p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row justify-between items-center mb-3 sm:mb-4 gap-2">
+                  <span className="text-white font-black text-base sm:text-lg">
                     card {currentCardIndex + 1} of {scenarios.length}
                   </span>
-                  <span className="text-gray-400 font-bold">
+                  <span className="text-gray-400 font-bold text-sm sm:text-base">
                     {swipeResults.filter(r => r.choice === 'rizz').length} 💚 | {swipeResults.filter(r => r.choice === 'risk').length} ❤️
                   </span>
                 </div>
-                <div className="w-full bg-gray-800 rounded-full h-3">
+                <div className="w-full bg-gray-800 rounded-full h-2 sm:h-3">
                   <div 
-                    className="bg-gradient-to-r from-purple-500 to-pink-500 h-3 rounded-full transition-all duration-500"
+                    className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 sm:h-3 rounded-full transition-all duration-500"
                     style={{ width: `${((currentCardIndex) / scenarios.length) * 100}%` }}
                   ></div>
                 </div>
@@ -399,7 +402,7 @@ const getAIJudgment = async (results: SwipeResult[]) => {
             </div>
 
             {/* Card */}
-            <div className="relative h-[500px] flex items-center justify-center">
+            <div className="relative h-[400px] sm:h-[500px] flex items-center justify-center">
               <div 
                 ref={cardRef}
                 className={`
@@ -410,18 +413,18 @@ const getAIJudgment = async (results: SwipeResult[]) => {
                 `}
               >
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl blur opacity-20 group-hover:opacity-40 transition-opacity duration-300" />
-                <div className="relative bg-gray-900/95 backdrop-blur-sm border border-gray-800 rounded-2xl p-10 text-center">
-                  <div className="text-6xl mb-8">🤔</div>
-                  <p className="text-white text-xl leading-relaxed mb-12 font-medium">
+                <div className="relative bg-gray-900/95 backdrop-blur-sm border border-gray-800 rounded-2xl p-6 sm:p-10 text-center">
+                  <div className="text-4xl sm:text-6xl mb-4 sm:mb-8">🤔</div>
+                  <p className="text-white text-lg sm:text-xl leading-relaxed mb-8 sm:mb-12 font-medium px-2">
                     {scenarios[currentCardIndex]}
                   </p>
                   
-                  <div className="flex justify-center gap-8">
+                  <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-8">
                     <button
                       onClick={() => handleSwipe('risk')}
-                      className="group relative overflow-hidden bg-gradient-to-r from-red-600 to-red-500 text-white font-black py-6 px-8 rounded-xl transition-all duration-300 hover:scale-110 hover:shadow-2xl hover:shadow-red-500/25"
+                      className="group relative overflow-hidden bg-gradient-to-r from-red-600 to-red-500 text-white font-black py-4 px-6 sm:py-6 sm:px-8 rounded-xl transition-all duration-300 hover:scale-110 hover:shadow-2xl hover:shadow-red-500/25 min-h-[60px] sm:min-h-[auto]"
                     >
-                      <span className="relative z-10 flex items-center gap-3 text-lg">
+                      <span className="relative z-10 flex items-center justify-center gap-2 sm:gap-3 text-base sm:text-lg">
                         <span>❤️</span>
                         <span>delulu risk</span>
                       </span>
@@ -430,9 +433,9 @@ const getAIJudgment = async (results: SwipeResult[]) => {
                     
                     <button
                       onClick={() => handleSwipe('rizz')}
-                      className="group relative overflow-hidden bg-gradient-to-r from-green-600 to-green-500 text-white font-black py-6 px-8 rounded-xl transition-all duration-300 hover:scale-110 hover:shadow-2xl hover:shadow-green-500/25"
+                      className="group relative overflow-hidden bg-gradient-to-r from-green-600 to-green-500 text-white font-black py-4 px-6 sm:py-6 sm:px-8 rounded-xl transition-all duration-300 hover:scale-110 hover:shadow-2xl hover:shadow-green-500/25 min-h-[60px] sm:min-h-[auto]"
                     >
-                      <span className="relative z-10 flex items-center gap-3 text-lg">
+                      <span className="relative z-10 flex items-center justify-center gap-2 sm:gap-3 text-base sm:text-lg">
                         <span>💚</span>
                         <span>valid rizz</span>
                       </span>
@@ -444,8 +447,8 @@ const getAIJudgment = async (results: SwipeResult[]) => {
             </div>
 
             {/* Instructions */}
-            <div className="text-center">
-              <p className="text-gray-400 text-sm leading-relaxed">
+            <div className="text-center px-4">
+              <p className="text-gray-400 text-xs sm:text-sm leading-relaxed">
                 <span className="text-green-400 font-bold">💚 valid rizz</span> = this could actually mean they're interested
                 <br />
                 <span className="text-red-400 font-bold">❤️ delulu risk</span> = bestie you're reading too much into this fr
@@ -453,19 +456,20 @@ const getAIJudgment = async (results: SwipeResult[]) => {
             </div>
           </div>
         )}
+
         {/* Results Phase */}
         {gameState === 'results' && (
-          <div ref={resultsRef} className="space-y-8">
+          <div ref={resultsRef} className="space-y-4 sm:space-y-8">
             {loading ? (
               <div className="feature-card group max-w-2xl mx-auto">
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl blur opacity-20 group-hover:opacity-40 transition-opacity duration-300" />
-                <div className="relative bg-gray-900/90 backdrop-blur-sm border border-gray-800 rounded-2xl p-16 text-center">
-                  <div className="relative mb-8">
-                    <div className="w-20 h-20 border-4 border-transparent border-t-purple-400 border-r-pink-400 rounded-full animate-spin mx-auto"></div>
-                    <div className="absolute top-2 left-1/2 transform -translate-x-1/2 w-16 h-16 border-4 border-transparent border-b-cyan-400 border-l-yellow-400 rounded-full animate-spin animate-reverse"></div>
+                <div className="relative bg-gray-900/90 backdrop-blur-sm border border-gray-800 rounded-2xl p-8 sm:p-16 text-center">
+                  <div className="relative mb-4 sm:mb-8">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 border-4 border-transparent border-t-purple-400 border-r-pink-400 rounded-full animate-spin mx-auto"></div>
+                    <div className="absolute top-1 left-1/2 sm:top-2 transform -translate-x-1/2 w-14 h-14 sm:w-16 sm:h-16 border-4 border-transparent border-b-cyan-400 border-l-yellow-400 rounded-full animate-spin animate-reverse"></div>
                   </div>
-                  <p className="text-white text-xl font-bold">AI is calculating your delulu level... 🤖</p>
-                  <p className="text-gray-400 mt-4">this might hurt bestie</p>
+                  <p className="text-white text-lg sm:text-xl font-bold">AI is calculating your delulu level... 🤖</p>
+                  <p className="text-gray-400 mt-2 sm:mt-4 text-sm sm:text-base">this might hurt bestie</p>
                 </div>
               </div>
             ) : aiJudgment && (
@@ -473,56 +477,57 @@ const getAIJudgment = async (results: SwipeResult[]) => {
                 {/* AI Judgment */}
                 <div className="feature-card group max-w-3xl mx-auto">
                   <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl blur opacity-20 group-hover:opacity-40 transition-opacity duration-300" />
-                  <div className="relative bg-gray-900/90 backdrop-blur-sm border border-gray-800 rounded-2xl p-12 text-center">
-                    <div className="text-8xl mb-6">🎭</div>
-                    <h2 className="text-3xl font-black text-white mb-6">your delulu diagnosis is in</h2>
+                  <div className="relative bg-gray-900/90 backdrop-blur-sm border border-gray-800 rounded-2xl p-6 sm:p-12 text-center">
+                    <div className="text-4xl sm:text-8xl mb-3 sm:mb-6">🎭</div>
+                    <h2 className="text-xl sm:text-3xl font-black text-white mb-4 sm:mb-6">your delulu diagnosis is in</h2>
                     
-                    <div className="mb-8">
-                      <div className={`text-5xl font-black ${getDeluluLevel(aiJudgment.deluluRating).color} mb-3`}>
+                    <div className="mb-6 sm:mb-8">
+                      <div className={`text-3xl sm:text-5xl font-black ${getDeluluLevel(aiJudgment.deluluRating).color} mb-2 sm:mb-3`}>
                         {getDeluluLevel(aiJudgment.deluluRating).emoji} {aiJudgment.deluluRating}/10
                       </div>
-                      <div className={`text-2xl font-bold ${getDeluluLevel(aiJudgment.deluluRating).color}`}>
+                      <div className={`text-lg sm:text-2xl font-bold ${getDeluluLevel(aiJudgment.deluluRating).color}`}>
                         {getDeluluLevel(aiJudgment.deluluRating).text}
                       </div>
                     </div>
                     
-                    <div className="bg-gray-800/40 rounded-xl p-8 mb-8 border border-gray-700">
-                      <p className="text-white text-lg leading-relaxed font-medium">{aiJudgment.judgment}</p>
+                    <div className="bg-gray-800/40 rounded-xl p-4 sm:p-8 mb-6 sm:mb-8 border border-gray-700">
+                      <p className="text-white text-base sm:text-lg leading-relaxed font-medium">{aiJudgment.judgment}</p>
                     </div>
                     
                     {/* Stats */}
-                    <div className="grid grid-cols-3 gap-6 mb-8">
-                      <div className="bg-gray-800/40 rounded-xl p-6 border border-gray-700">
-                        <div className="text-3xl font-black text-white mb-2">{swipeResults.length}</div>
-                        <div className="text-gray-400 font-bold text-sm">cards swiped</div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+                      <div className="bg-gray-800/40 rounded-xl p-4 sm:p-6 border border-gray-700">
+                        <div className="text-2xl sm:text-3xl font-black text-white mb-1 sm:mb-2">{swipeResults.length}</div>
+                        <div className="text-gray-400 font-bold text-xs sm:text-sm">cards swiped</div>
                       </div>
-                      <div className="bg-green-500/10 rounded-xl p-6 border border-green-500/30">
-                        <div className="text-3xl font-black text-green-400 mb-2">
+                      <div className="bg-green-500/10 rounded-xl p-4 sm:p-6 border border-green-500/30">
+                        <div className="text-2xl sm:text-3xl font-black text-green-400 mb-1 sm:mb-2">
                           {swipeResults.filter(r => r.choice === 'rizz').length}
                         </div>
-                        <div className="text-green-300 font-bold text-sm">valid rizz 💚</div>
+                        <div className="text-green-300 font-bold text-xs sm:text-sm">valid rizz 💚</div>
                       </div>
-                      <div className="bg-red-500/10 rounded-xl p-6 border border-red-500/30">
-                        <div className="text-3xl font-black text-red-400 mb-2">
+                      <div className="bg-red-500/10 rounded-xl p-4 sm:p-6 border border-red-500/30">
+                        <div className="text-2xl sm:text-3xl font-black text-red-400 mb-1 sm:mb-2">
                           {swipeResults.filter(r => r.choice === 'risk').length}
                         </div>
-                        <div className="text-red-300 font-bold text-sm">delulu risk ❤️</div>
+                        <div className="text-red-300 font-bold text-xs sm:text-sm">delulu risk ❤️</div>
                       </div>
                     </div>
                   </div>
                 </div>
+
                 {/* Action Buttons */}
-                <div className="flex flex-col sm:flex-row justify-center gap-6 max-w-2xl mx-auto">
+                <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6 max-w-2xl mx-auto px-4">
                   <button
                     onClick={resetGame}
-                    className="flex-1 bg-gray-800/60 text-white font-black py-4 px-8 rounded-xl hover:bg-gray-700/60 transition-all duration-200 border border-gray-700 hover:border-gray-600 text-lg"
+                    className="flex-1 bg-gray-800/60 text-white font-black py-4 px-6 sm:px-8 rounded-xl hover:bg-gray-700/60 transition-all duration-200 border border-gray-700 hover:border-gray-600 text-base sm:text-lg min-h-[60px] sm:min-h-[auto]"
                   >
                     roast me again 🔥
                   </button>
                   
                   <Link href="/dashboard" className="flex-1">
-                    <div className="w-full group relative overflow-hidden bg-gradient-to-r from-purple-600 to-pink-600 text-white font-black py-4 px-8 rounded-xl hover:scale-105 transition-all duration-200 text-center text-lg">
-                      <span className="relative z-10 flex items-center justify-center gap-3">
+                    <div className="w-full group relative overflow-hidden bg-gradient-to-r from-purple-600 to-pink-600 text-white font-black py-4 px-6 sm:px-8 rounded-xl hover:scale-105 transition-all duration-200 text-center text-base sm:text-lg min-h-[60px] sm:min-h-[auto] flex items-center justify-center">
+                      <span className="relative z-10 flex items-center justify-center gap-2 sm:gap-3">
                         <span>view delulu stats</span>
                         <span>📊</span>
                       </span>
@@ -532,8 +537,8 @@ const getAIJudgment = async (results: SwipeResult[]) => {
                 </div>
 
                 {/* Saved Notice */}
-                <div className="text-center">
-                  <p className="text-gray-400 text-sm font-medium">
+                <div className="text-center px-4">
+                  <p className="text-gray-400 text-xs sm:text-sm font-medium">
                     <span className="text-green-400">✅</span> your delulu data has been saved to the dashboard (unfortunately)
                   </p>
                 </div>
@@ -611,6 +616,16 @@ const getAIJudgment = async (results: SwipeResult[]) => {
 
         .animate-reverse {
           animation-direction: reverse;
+        }
+        
+        @media (max-width: 480px) {
+          .xs\\:hidden {
+            display: none !important;
+          }
+          
+          .xs\\:inline {
+            display: inline !important;
+          }
         }
       `}</style>
     </div>
