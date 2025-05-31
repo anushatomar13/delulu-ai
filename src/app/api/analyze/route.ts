@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
           messages: [
             {
               role: "user",
-              content: `You're a Gen Z bestie who gives brutally honest, funny, and slightly unhinged advice. Your friend just told you this crush scenario: "${scenario}". Based on the vibe, give them a reality check — is it delulu or realistic? Break it down casually, with emojis, slang, and a touch of sass. Keep it unfiltered like a TikTok rant. Include references to the emotions detected: ${topEmotions.map((e: any) => e.label).join(", ")}, but don't sound like an AI. Just go off like you're voice-noting your bestie. End with a simple verdict: "Totally delulu" or "Not delulu, go for it".`
+              content: `You're my Gen Z bestie who’s always real, dropping truth bombs like we’re gossiping over coffee. I just told you this crush scenario: "${scenario}". Pick up on the emotions — ${topEmotions.map((e: any) => e.label).join(", ")} — and give me a quick reality check. Is this delulu or realistic? Talk to me like you’re sending a voice note, keeping it chill, sassy, and straight-up. Don't use words like "hey girl" as it can be a person of any gender using the feature". Use a couple of emojis for flavor 😎, but don’t overdo it. Don’t force the slang — just sound like you’re hyping me up or lovingly dragging me. If it’s got potential, gas me up; if it’s wild, keep it 100. End with a clear verdict: "Totally delulu" or "Not delulu, go for it."`
             }
           ],
         }),
